@@ -1,0 +1,135 @@
+.app-shell {
+  width: min(1160px, calc(100% - 2rem));
+  margin: 1.2rem auto 2rem;
+  display: grid;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.app-bg-shape {
+  position: fixed;
+  border-radius: 999px;
+  filter: blur(65px);
+  z-index: 0;
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.app-bg-shape-a {
+  width: 320px;
+  height: 320px;
+  background: #3fb3a5;
+  top: -80px;
+  left: -80px;
+}
+
+.app-bg-shape-b {
+  width: 360px;
+  height: 360px;
+  background: #ff9d3c;
+  right: -90px;
+  bottom: -130px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.brand-mark {
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 0.85rem;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: #041717;
+  background: linear-gradient(135deg, var(--accent), #7be9d8);
+}
+
+.brand h1 {
+  font-size: 1.2rem;
+  line-height: 1.05;
+}
+
+.brand p {
+  color: var(--text-dim);
+  font-size: 0.84rem;
+}
+
+.connection-card {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1.2fr 1fr;
+  padding: 1rem;
+}
+
+.connection-main,
+.connection-meta {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.main-nav {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-soft);
+  border-radius: 999px;
+  padding: 0.42rem 0.85rem;
+  cursor: pointer;
+}
+
+.nav-btn.is-active {
+  color: #032220;
+  border-color: rgba(52, 213, 190, 0.9);
+  background: linear-gradient(120deg, var(--accent), #89f4e5);
+}
+
+.page-root {
+  min-height: 280px;
+}
+
+.page-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.two-col {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 900px) {
+  .connection-card,
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .app-shell {
+    width: calc(100% - 1rem);
+    margin: 0.6rem auto 1rem;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

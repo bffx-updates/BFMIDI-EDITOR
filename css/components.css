@@ -1,0 +1,221 @@
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.btn {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 0.6rem 0.95rem;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  border-color: rgba(52, 213, 190, 0.45);
+  background: linear-gradient(120deg, rgba(52, 213, 190, 0.35), rgba(255, 179, 71, 0.25));
+}
+
+.btn-danger {
+  border-color: rgba(255, 107, 107, 0.55);
+  background: rgba(255, 107, 107, 0.2);
+}
+
+.btn-ghost {
+  background: transparent;
+}
+
+.status-chip {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.86rem;
+  color: var(--text-soft);
+  white-space: nowrap;
+}
+
+.status-chip[data-state="conectado"] {
+  border-color: rgba(110, 231, 183, 0.55);
+  color: var(--ok);
+}
+
+.status-chip[data-state="conectando"] {
+  border-color: rgba(255, 209, 102, 0.55);
+  color: var(--warning);
+}
+
+.status-chip[data-state="erro"] {
+  border-color: rgba(255, 107, 107, 0.6);
+  color: var(--danger);
+}
+
+.badge-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.76rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.badge[data-supported="true"] {
+  border-color: rgba(110, 231, 183, 0.6);
+  color: var(--ok);
+}
+
+.badge[data-supported="false"] {
+  border-color: rgba(255, 107, 107, 0.6);
+  color: var(--danger);
+}
+
+.field-grid {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.section-title {
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.65rem;
+  color: var(--text-soft);
+}
+
+.card-block {
+  padding: 1rem;
+}
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.toast-container {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  display: grid;
+  gap: 0.55rem;
+  z-index: 1000;
+}
+
+.toast {
+  min-width: 220px;
+  max-width: 360px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 28, 28, 0.95);
+  color: var(--text-main);
+}
+
+.toast[data-type="error"] {
+  border-color: rgba(255, 107, 107, 0.6);
+}
+
+.toast[data-type="success"] {
+  border-color: rgba(110, 231, 183, 0.6);
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  gap: 0.75rem;
+  background: rgba(3, 11, 11, 0.68);
+  backdrop-filter: blur(6px);
+  z-index: 900;
+}
+
+.spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.22);
+  border-top-color: var(--accent);
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.confirm-modal {
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  background: #072121;
+  color: var(--text-main);
+  width: min(420px, 92vw);
+  padding: 1.1rem;
+}
+
+.confirm-modal::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.switch-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(40px, 1fr));
+  gap: 0.45rem;
+}
+
+.sw-btn {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-main);
+  padding: 0.5rem 0.25rem;
+  cursor: pointer;
+}
+
+.sw-btn.is-selected {
+  border-color: rgba(52, 213, 190, 0.72);
+  background: rgba(52, 213, 190, 0.2);
+}
+
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.palette button {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+}
+
+.palette button.is-selected {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}

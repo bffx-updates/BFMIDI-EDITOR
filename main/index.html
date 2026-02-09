@@ -1,0 +1,467 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BFMIDI - Editor</title>
+  <style>
+    :root{
+      --bg:#070910;
+      --bg-soft:#0c1018;
+      --card:#131822;
+      --muted:#9aa5b3;
+      --accent:#39a0ff;
+      --accent-soft:rgba(57,160,255,0.2);
+      --success:#4CAF50;
+      --danger:#ff5c5c;
+      --glass:rgba(255,255,255,0.02);
+      --radius:14px;
+      --shadow-soft:0 14px 40px rgba(0,0,0,0.65);
+      --transition-fast:160ms ease;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(57,160,255,0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(124,58,237,0.12), transparent 55%),
+        linear-gradient(180deg,#05060a 0%, #080b11 100%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .page{
+      max-width:1040px;
+      margin:8px auto 18px auto;
+      padding:12px 20px 20px 20px;
+      box-sizing:border-box;
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0));
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 10px 30px rgba(0,0,0,0.55);
+      backdrop-filter:blur(10px);
+      animation:fadeDown 260ms ease-out;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:70px;
+      height:44px;
+      border-radius:14px;
+      background:radial-gradient(circle at 30% 0%,#7be0ff 0%,#39a0ff 36%,#1b2840 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      letter-spacing:0.06em;
+      font-size:0.7rem;
+      text-transform:uppercase;
+      color:#02060c;
+      box-shadow:0 10px 26px rgba(0,0,0,0.75), inset 0 -4px 8px rgba(0,0,0,0.35);
+    }
+
+    h1{
+      font-size:1.2rem;
+      margin:0;
+      font-weight:700;
+      letter-spacing:0.14em;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:0.76rem;
+      margin-top:3px;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+    .subtitle .fw-version{
+      color:#ffa500;
+      font-weight:700;
+    }
+
+    .card{
+      background:
+        radial-gradient(circle at top left, rgba(57,160,255,0.06), transparent 70%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,0.02), transparent 70%),
+        var(--bg-soft);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:var(--radius);
+      padding:18px 18px 16px 18px;
+      box-shadow:var(--shadow-soft);
+      max-width:720px;
+      margin:4px auto 0 auto;
+      backdrop-filter:blur(14px);
+      animation:fadeUp 260ms ease-out;
+    }
+
+    .menu-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:18px;
+      margin-top:18px;
+    }
+
+    @media (min-width:1040px){
+      .menu-grid{
+        max-width:720px;
+        margin-left:auto;
+        margin-right:auto;
+      }
+    }
+
+    .menu-btn{
+      background:linear-gradient(180deg,rgba(57,160,255,0.14),rgba(15,24,40,1));
+      color:#ffffff;
+      padding:14px 16px;
+      border-radius:14px;
+      border:1px solid rgba(57,160,255,0.9);
+      font-weight:700;
+      display:flex;
+      flex-direction:row;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      box-shadow:0 18px 40px rgba(0,0,0,0.95);
+      transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        border-color var(--transition-fast),
+        background var(--transition-fast),
+        color var(--transition-fast);
+      height:90px;
+      width:100%;
+      box-sizing:border-box;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .menu-btn::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at top right,rgba(57,160,255,0.22),transparent 75%),
+        radial-gradient(circle at bottom left,rgba(57,160,255,0.08),transparent 80%);
+      opacity:0;
+      transition:opacity var(--transition-fast);
+      pointer-events:none;
+    }
+
+    .menu-btn:hover{
+      transform:translateY(-4px);
+      box-shadow:0 20px 40px rgba(0,0,0,0.95);
+      border-color:var(--accent);
+      background:linear-gradient(180deg,#192335,#0b0f18);
+      color:#ffffff;
+    }
+
+    .menu-btn:hover::after{
+      opacity:1;
+    }
+
+    .menu-icon{
+      width:40px;
+      height:40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height:0;
+      color:var(--accent);
+      flex:0 0 auto;
+    }
+
+    .menu-icon svg{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .menu-label{
+      font-size:1.5rem;
+      color:#f5f7fb;
+      font-weight:800;
+      letter-spacing:0.12em;
+      text-transform:uppercase;
+      margin:0;
+      line-height:1.1;
+      text-align:center;
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+
+    .menu-label .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background-color:var(--accent);
+      box-shadow:0 0 8px rgba(57,160,255,0.9);
+      display:inline-block;
+    }
+
+    .info-card{
+      background:var(--card);
+      border-radius:12px;
+      padding:12px 12px 10px 12px;
+      border:1px solid rgba(255,255,255,0.04);
+      margin-top:16px;
+      box-shadow:0 10px 26px rgba(0,0,0,0.75);
+    }
+
+    .info-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+
+    .info-title{
+      font-weight:600;
+      font-size:0.9rem;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .info-title span.icon{
+      width:14px;
+      height:14px;
+      border-radius:4px;
+      background:var(--accent);
+      box-shadow:0 0 10px rgba(57,160,255,0.8);
+    }
+
+    .mem-bar{
+      height:10px;
+      width:100%;
+      background:rgba(255,255,255,0.02);
+      border-radius:999px;
+      overflow:hidden;
+      margin-top:6px;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    .mem-bar-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--accent),#7be0ff);
+      transition:width 400ms ease;
+    }
+
+    #host-status-card{
+      margin-top:16px;
+      border:2px solid var(--muted);
+      transition:border-color 300ms ease, background 200ms ease;
+    }
+
+    #host-status-card.connected{
+      border-color:var(--success);
+      background:rgba(76,175,80,0.03);
+    }
+
+    #host-status-card.disconnected{
+      border-color:var(--danger);
+      background:rgba(255,92,92,0.02);
+    }
+
+    @keyframes fadeDown{
+      from{opacity:0;transform:translateY(-8px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(8px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+  </style>
+  <script src="/js/parity-bridge-client.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">BFMiDI</div>
+        <div>
+          <h1>BFMiDI EDITOR</h1>
+          <div class="subtitle">Firmware: <span id="fwMain" class="fw-version">%%FIRMWARE_VERSION%%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="menu-grid">
+        <button class="menu-btn" id="btnPresetConfig" aria-label="Presets">
+          <div class="menu-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" focusable="false">
+              <rect x="3" y="3" width="8" height="8" rx="1.5" fill="currentColor" opacity="0.9"/>
+              <rect x="13" y="3" width="8" height="8" rx="1.5" fill="currentColor" opacity="0.6"/>
+              <rect x="3" y="13" width="18" height="8" rx="1.5" fill="currentColor" opacity="0.4"/>
+            </svg>
+          </div>
+          <p class="menu-label">
+            <span class="dot"></span>
+            <span>Presets</span>
+            <span class="dot"></span>
+          </p>
+        </button>
+
+        <button class="menu-btn" id="btnGlobalConfig" aria-label="Globals">
+          <div class="menu-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" focusable="false">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" fill="currentColor" opacity="0.95"/>
+              <path d="M19.4 15a7.9 7.9 0 0 0 .1-1 7.9 7.9 0 0 0-.1-1l2.1-1.6a0.5 0.5 0 0 0 .12-0.66l-2-3.46a0.5 0.5 0 0 0-.6-0.22l-2.5 1a7.7 7.7 0 0 0-1.73-1l-0.38-2.65A0.5 0.5 0 0 0 13.9 2h-3.8a0.5 0.5 0 0 0-0.5.42L9.22 5a7.7 7.7 0 0 0-1.73 1l-2.5-1a0.5 0.5 0 0 0-.6.22L2.7 8.9a0.5 0.5 0 0 0 .12.66L4.9 11a7.9 7.9 0 0 0-.1 1c0 .34.03.68.1 1L2.8 14.6a0.5 0.5 0 0 0-.12.66l2 3.46c.15.25.46.35.72.22l2.5-1c.53.4 1.11.73 1.73 1l0.38 2.65c.07.28.3.48.58.48h3.8c.28 0 .51-.2.58-.48l0.38-2.65c.62-.27 1.2-.6 1.73-1l2.5 1c.26.12.57.03.72-.22l2-3.46a0.5 0.5 0 0 0-.12-.66L19.4 15z" fill="currentColor" opacity="0.6"/>
+            </svg>
+          </div>
+          <p class="menu-label">
+            <span class="dot"></span>
+            <span>Globals</span>
+            <span class="dot"></span>
+          </p>
+        </button>
+
+        <button class="menu-btn" id="btnSystem" aria-label="System">
+          <div class="menu-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" focusable="false">
+              <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.95"/>
+              <rect x="11" y="7" width="2" height="2" fill="#e6eef6"/>
+              <rect x="11" y="11" width="2" height="6" fill="#e6eef6"/>
+            </svg>
+          </div>
+          <p class="menu-label">
+            <span class="dot"></span>
+            <span>System</span>
+            <span class="dot"></span>
+          </p>
+        </button>
+      </div>
+
+      <div class="info-card">
+        <div class="info-header">
+          <div class="info-title">
+            <span class="icon"></span>
+            <span>MEMORY - <span id="nvsMain">0%</span></span>
+          </div>
+        </div>
+        <div class="mem-bar">
+          <div id="memFillMain" class="mem-bar-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div id="host-status-card" class="info-card">
+        <div class="info-header">
+          <div class="info-title" style="width:100%;display:flex;align-items:center;gap:6px;">
+            <span class="icon"></span>
+            <span>USB HOST - <span id="host-status-message">Aguardando...</span></span>
+          </div>
+        </div>
+        <div style="margin-top:6px; font-size:0.84rem; color:var(--muted);">
+          <span>Fabricante <strong id="host-manufacturer">N/A</strong> / Produto <strong id="host-product">N/A</strong></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('btnPresetConfig').addEventListener('click', function() {
+      window.location.href = '/preset-config';
+    });
+    document.getElementById('btnGlobalConfig').addEventListener('click', function() {
+      window.location.href = '/global-config';
+    });
+    document.getElementById('btnSystem').addEventListener('click', function() {
+      window.location.href = '/system';
+    });
+
+    fetch('/api/system/info').then(r=>{
+      if(!r.ok) throw 0;
+      return r.json();
+    }).then(j=>{
+      if (j && j.nvs) {
+        const pct = j.nvs.usedPercent || 0;
+        const memFill = document.getElementById('memFillMain');
+        const nvsMain = document.getElementById('nvsMain');
+        if (memFill) memFill.style.width = pct + '%';
+        if (nvsMain) nvsMain.innerText = pct + '%';
+      }
+      if (j && j.firmwareVersion) {
+        const fw = document.getElementById('fwMain');
+        if (fw) fw.innerText = j.firmwareVersion;
+      }
+    }).catch(()=>{});
+
+    function updateHostStatus() {
+      fetch('/api/host-status').then(async r => {
+        let data = null;
+        try { data = await r.json(); } catch (_) {}
+        if (!r.ok) {
+          return {
+            connected: false,
+            status: 'Aguardando conexão',
+            manufacturer: 'N/A',
+            product: 'N/A',
+            _error: true,
+            _message: (data && data.message) ? data.message : ('HTTP ' + r.status)
+          };
+        }
+        return data || {};
+      }).then(data => {
+        const card = document.getElementById('host-status-card');
+        const statusMsg = document.getElementById('host-status-message');
+        const manufacturer = document.getElementById('host-manufacturer');
+        const product = document.getElementById('host-product');
+
+        const message = data.status || (data.connected ? 'Conectado' : 'Desconectado');
+        statusMsg.innerText = message;
+
+        const upperMessage = message.toUpperCase();
+        if (upperMessage === 'DESCONECTADO' || upperMessage.includes('AGUARDANDO')) {
+          card.classList.add('disconnected');
+          card.classList.remove('connected');
+        } else {
+          card.classList.add('connected');
+          card.classList.remove('disconnected');
+        }
+
+        manufacturer.innerText = data.manufacturer || 'N/A';
+        product.innerText = data.product || 'N/A';
+        if (data && data._error && data._message) {
+          console.warn('Host status temporariamente indisponível:', data._message);
+        }
+      }).catch(error => {
+        console.warn('Host status fetch falhou:', error);
+        const card = document.getElementById('host-status-card');
+        card.classList.add('disconnected');
+        card.classList.remove('connected');
+        document.getElementById('host-status-message').innerText = 'Erro de comunicação';
+        document.getElementById('host-manufacturer').innerText = 'N/A';
+        document.getElementById('host-product').innerText = 'N/A';
+      });
+    }
+
+    // Update status on page load and then every 3 seconds
+    updateHostStatus();
+    setInterval(updateHostStatus, 3000);
+  </script>
+</body>
+</html>

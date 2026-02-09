@@ -1,0 +1,19 @@
+.home-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.home-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.home-cards .card {
+  padding: 1rem;
+}
+
+.home-value {
+  font-size: 1.4rem;
+  color: var(--accent);
+}

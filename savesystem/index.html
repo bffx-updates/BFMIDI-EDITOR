@@ -1,0 +1,69 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BFMIDI - Salvando Sistema</title>
+  <style>
+    html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, Segoe UI, sans-serif; background: #080b11; color: #e6eef6; }
+    .wrap { display: grid; place-items: center; height: 100%; padding: 16px; text-align: center; }
+    .card { border: 1px solid rgba(57,160,255,0.45); border-radius: 12px; padding: 18px; background: rgba(10,15,24,0.95); max-width: 420px; width: 100%; }
+    h1 { margin: 0 0 8px; font-size: 1.05rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    p { margin: 0; color: #9aa5b3; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Salvando configuracao</h1>
+      <p id="status">Aguardando conexao USB...</p>
+    </div>
+  </div>
+
+  <script>
+    (async function () {
+      const statusEl = document.getElementById('status');
+      const bridge = window.parent && window.parent !== window ? window.parent.BFMIDIExternalBridge : null;
+      const qs = new URLSearchParams(window.location.search || '');
+      const noRestart = qs.has('norestart');
+
+      if (!bridge || typeof bridge.request !== 'function') {
+        statusEl.textContent = 'Bridge indisponivel. Voltando para a tela principal.';
+        setTimeout(function () { window.location.replace('/main/'); }, 800);
+        return;
+      }
+
+      try {
+        const targetUrl = '/savesystem' + window.location.search;
+        const result = await bridge.request(targetUrl, { method: 'GET' });
+
+        if (result && result.status >= 200 && result.status < 300) {
+          if (noRestart) {
+            statusEl.textContent = 'Configuracao salva com sucesso.';
+          } else {
+            statusEl.textContent = 'Configuracao salva. ESP32-S2 reiniciando...';
+          }
+        } else {
+          statusEl.textContent = 'Falha ao salvar configuracao.';
+        }
+      } catch (error) {
+        const msg = (error && error.message ? error.message : String(error));
+        if (!noRestart && /Conexao encerrada|NetworkError|disconnected|closed/i.test(msg)) {
+          // Reinicio pode derrubar a serial antes de concluir toda a resposta.
+          statusEl.textContent = 'Configuracao salva. ESP32-S2 reiniciando...';
+        } else {
+          statusEl.textContent = 'Erro: ' + msg;
+        }
+      }
+
+      setTimeout(function () {
+        if (noRestart) {
+          window.location.replace('/system/');
+        } else {
+          window.location.replace('/main/');
+        }
+      }, noRestart ? 900 : 1400);
+    })();
+  </script>
+</body>
+</html>

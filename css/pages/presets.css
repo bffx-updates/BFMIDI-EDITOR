@@ -1,0 +1,21 @@
+.presets-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.switch-editor {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.collapsible {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.collapsible summary {
+  color: var(--text-soft);
+  margin-bottom: 0.55rem;
+}

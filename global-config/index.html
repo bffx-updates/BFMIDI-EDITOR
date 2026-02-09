@@ -1,0 +1,3026 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BFMIDI - Config Globais</title>
+
+  <style>
+    :root{
+      --bg:#070910;
+      --bg-soft:#0c1018;
+      --card:#131822;
+      --muted:#9aa5b3;
+      --accent:#39a0ff;
+      --accent-soft:rgba(57,160,255,0.2);
+      --success:#4CAF50;
+      --danger:#ff5c5c;
+      --glass:rgba(255,255,255,0.02);
+      --radius:14px;
+      --shadow-soft:0 14px 40px rgba(0,0,0,0.65);
+      --transition-fast:160ms ease;
+      --focus:#ff8800;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(57,160,255,0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(124,58,237,0.12), transparent 55%),
+        linear-gradient(180deg,#05060a 0%, #080b11 100%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+      overflow-x:hidden;
+    }
+
+    .page{
+      max-width:1040px;
+      margin:8px auto 80px auto;
+      padding:12px 12px 80px 12px; /* reduz padding lateral para caber melhor em telas menores */
+      box-sizing:border-box;
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:8px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0));
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 10px 30px rgba(0,0,0,0.55);
+      backdrop-filter:blur(10px);
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:70px;
+      height:44px;
+      border-radius:14px;
+      background:radial-gradient(circle at 30% 0%,#7be0ff 0%,#39a0ff 36%,#1b2840 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      letter-spacing:0.06em;
+      font-size:0.7rem;
+      text-transform:uppercase;
+      color:#02060c;
+      box-shadow:0 10px 26px rgba(0,0,0,0.75), inset 0 -4px 8px rgba(0,0,0,0.35);
+    }
+
+    h1{
+      font-size:1.2rem;
+      margin:0;
+      font-weight:700;
+      letter-spacing:0.14em;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:0.76rem;
+      margin-top:3px;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+    .subtitle .fw-version{
+      color:#ffa500;
+      font-weight:700;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:18px;
+      margin-top:10px; /* aproximar primeiro card do cabeÃ§alho */
+    }
+
+    .card{
+      background:
+        radial-gradient(circle at top left, rgba(57,160,255,0.06), transparent 70%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,0.02), transparent 70%),
+        var(--bg-soft);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(14px);
+      box-sizing:border-box;
+      width:100%;
+      max-width:720px;
+      margin:0 auto;
+      overflow-x:hidden;
+    }
+
+    .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; color: #cccccc; }
+        .form-group input[type="number"],
+        .form-group input[type="text"],
+        .form-group select,
+        .form-group input[type="color"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+            background-color: var(--bg-soft);
+            color: #e6eef6;
+            box-shadow: 0 0 10px rgba(57,160,255,0.35);
+        }
+        .form-group input[type="number"]:focus,
+        .form-group input[type="text"]:focus,
+        .form-group select:focus,
+        .form-group input[type="color"]:focus { border-color: var(--focus); outline: none; }
+        .form-group input[type="checkbox"] { margin-right: 10px; transform: scale(1.2); }
+        .btn {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #071025;
+            background: linear-gradient(180deg,#e6f7ff,#cfeaff);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition:
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast);
+            text-align: center;
+            box-sizing: border-box;
+            min-width: 150px;
+            height: 36px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(0,0,0,0.75);
+            background: linear-gradient(180deg,#f4fbff,#d9efff);
+        }
+        .btn-save {
+            background: linear-gradient(180deg,var(--success),#3ca94a);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(76,175,80,0.4);
+        }
+        .btn-reset {
+            background: linear-gradient(180deg,#ff5c5c,#ff7a7a);
+            color: #071025;
+        }
+        .btn-reset:hover {
+            box-shadow: 0 8px 20px rgba(255,92,92,0.4);
+        }
+        /* Toggle visual para Layer 2 (azul ON / magenta OFF) */
+        .live-layer-btn {
+            padding: 10px 18px;
+            border-radius: 12px;
+            border: 2px solid var(--accent);
+            background: linear-gradient(180deg, rgba(57,160,255,0.18), rgba(57,160,255,0.05));
+            color: var(--accent);
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            min-width: 170px;
+            height: 40px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.6);
+            transition:
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast);
+        }
+        .live-layer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.75);
+            background: linear-gradient(180deg, rgba(57,160,255,0.26), rgba(57,160,255,0.10));
+        }
+        .live-layer-btn.off {
+            border-color: #ff00aa;
+            color: #ff00aa;
+            background: linear-gradient(180deg, rgba(255,0,170,0.20), rgba(255,0,170,0.06));
+            box-shadow: 0 10px 24px rgba(255,0,170,0.18);
+        }
+        .live-layer-btn.off:hover {
+            background: linear-gradient(180deg, rgba(255,0,170,0.28), rgba(255,0,170,0.12));
+            box-shadow: 0 14px 30px rgba(255,0,170,0.26);
+        }
+        .color-picker-group { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .color-picker-group label { flex-basis: 120px; margin-bottom: 0; }
+        #statusMessage { margin-top: 20px; font-weight: bold; }
+        /* Estilos para o slider de brilho */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .slider-container input[type="range"] {
+            flex-grow: 1;
+            margin: 0;
+            height: 10px; /* Altura da trilha */
+            -webkit-appearance: none; /* Remove aparencia padrao no Chrome/Safari */
+            appearance: none;
+            background: #777777; /* Cor da trilha mais clara */
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #3498db;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+        }
+        .slider-container .slider-value {
+            font-weight: bold;
+            min-width: 45px;
+            text-align: right;
+            color: #bbbbbb;
+        }
+        .tick-marks-container {
+            position: relative;
+            width: calc(100% - 60px);
+            margin-left: 0;
+            margin-top: 5px;
+            height: 20px;
+        }
+        .tick-marks {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5px;
+            box-sizing: border-box;
+            width: 100%;
+        }
+        .tick-marks span {
+            font-size: 0.8em;
+            color: #bbbbbb;
+            position: relative;
+        }
+        .tick-marks span::before {
+            content: "|";
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #999999;
+        }
+        /* RAMPA controls (match preset styles) */
+        .extras-group { margin-bottom:12px; padding:12px; background-color: #171a1d; border-radius:6px; border: 3px solid #888; }
+        .extras-group h4 { font-size:0.95em; margin:0 0 10px 0; color:#ddd; }
+        .spin-slider-container { width: 100%; }
+        .spin-slider-container label { display:block; margin-bottom:6px; color:#bbb; font-size:0.9em; }
+        .spin-slider { width: 100%; -webkit-appearance: none; appearance: none; height: 12px; border-radius: 8px; background: linear-gradient(180deg, #2e2e2e 0%, #1d1f22 100%); border: 1px solid #494c50; box-shadow: inset 0 3px 6px rgba(0,0,0,0.55); }
+        .spin-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(180deg, #9ea3ab 0%, #6e737a 100%); border: 1px solid #cfd4db; box-shadow: inset 0 2px 0 rgba(255,255,255,0.25); cursor: pointer; }
+        .spin-slider::-moz-range-thumb { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(180deg, #9ea3ab 0%, #6e737a 100%); border: 1px solid #cfd4db; box-shadow: inset 0 2px 0 rgba(255,255,255,0.25); cursor: pointer; }
+        .single-toggle-button { height: 48px; min-width: 52px; display: inline-flex; align-items: center; justify-content: center; padding: 0 12px; box-sizing: border-box; font-size: 0.95em; background: linear-gradient(180deg, #3b4046 0%, #2b2f33 100%); border: 3px solid #888; color: #d8dde4; cursor: pointer; transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease; border-radius: 10px; margin-left: 0; }
+        .single-toggle-button.active { background: #87CEEB; border-color: #87CEEB; color: #123; }
+        .single-toggle-button.cc-mode { border-color: #87CEEB; color: #87CEEB; box-shadow: 0 0 10px rgba(57,160,255,0.45); }
+        .single-toggle-button.pc-mode { border-color: #ffcc00; color: #ffcc00; box-shadow: 0 0 10px rgba(255,204,0,0.45); background: transparent; }
+        #startToggleBtnCc2_global { width: 100%; max-width: 100%; min-width: 0; white-space: normal; }
+        .ramp-toggle-row { display: grid; grid-template-columns: 1fr; gap: 12px; align-items: stretch; }
+        .spin-slider { background: linear-gradient(to right, #7fa6e8 0%, #2a2e33 0%); }
+        .ramp-grid { display:grid; grid-template-columns: 1fr; gap:14px; }
+        .ramp-sliders > .spin-slider-container { margin-bottom: 12px; }
+        @media (min-width: 560px) {
+            .ramp-grid { grid-template-columns: 2fr 1fr; }
+            .ramp-toggle-row { grid-template-columns: 1fr 1fr; }
+        }
+        /* Estilos para o seletor de cores customizado (popup) */
+        .custom-color-selector {
+            position: relative;
+            display: block; /* Alterado de inline-block para block */
+            width: 100%;    /* Adicionado para ocupar a largura do pai */
+        }
+        .selected-color-preview {
+            width: 100%; /* Ocupa a largura do .custom-color-selector pai */
+            height: 38px; 
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            cursor: pointer;
+            box-sizing: border-box;
+            background-color: var(--bg-soft); /* Cor de fundo padronizada */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* vertical-align: middle; Mantido se .custom-color-selector for inline-block */
+            box-shadow: 0 0 10px rgba(57,160,255,0.35);
+        }
+        .custom-color-selector:focus-within .selected-color-preview { border-color: var(--focus); }
+        .selected-color-preview-box { 
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            border: 1px solid #444;
+            border-radius: 3px;
+        }
+
+        .color-options-panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.3);
+            z-index: 90;
+            justify-content: center;
+            align-items: center;    
+        }
+        .color-options-panel-overlay.active {
+            display: flex;
+        }
+
+        .color-options-panel {
+            display: none;
+            background-color: #3a3f44;
+            border: 1px solid #555555;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 100; 
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            gap: 12px;
+            width: auto; 
+            max-width: 200px;
+            position: relative;
+        }
+        .color-options-panel-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #FFFFFF;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .color-options-panel .color-swatch {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #888888;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.1s ease, border-color 0.1s ease;
+            box-sizing: border-box;
+        }
+        .color-options-panel .color-swatch:hover {
+            transform: scale(1.05);
+            border-color: #AACCFF;
+        }
+
+        /* Ajuste para o color-picker-group quando usando o novo seletor */
+        .color-picker-group .custom-color-selector {
+            margin-left: 0px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 75px;
+            height: 34px;
+            margin-left: 10px;
+        }
+        .form-group label.toggle-label input[type="checkbox"] {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #555555;
+            border: 2px solid #888888;
+            transition: background-color 0.4s, border-color 0.4s;
+            border-radius: 34px;
+            box-sizing: border-box;
+        }
+
+        .toggle-slider:before {
+            content: "";
+            position: absolute;
+            height: 26px; 
+            width: 26px;  
+            left: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #bbbbbb;
+            transition: transform 0.4s, background-color 0.4s;
+            border-radius: 50%; 
+            z-index: 1;
+        }
+
+        .toggle-slider::after {
+            content: "OFF";
+            position: absolute;
+            right: 10px;
+            left: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            color: #bbbbbb;
+            z-index: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* ON State */
+        .form-group label.toggle-label input[type="checkbox"]:checked + .toggle-switch .toggle-slider {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+
+        .form-group label.toggle-label input[type="checkbox"]:checked + .toggle-switch .toggle-slider:before {
+            background-color: white;
+            transform: translate(41px, -50%);
+        }
+
+        .form-group label.toggle-label input[type="checkbox"]:checked + .toggle-switch .toggle-slider::after {
+            content: "ON";
+            color: white;
+            left: 12px;
+            right: auto;
+        }
+
+        .form-group label.toggle-label input[type="checkbox"]:focus + .toggle-switch .toggle-slider {
+            box-shadow: 0 0 2px 2px rgba(52, 80, 161, 0.5);
+        }
+        /* Ajuste para alinhar texto e toggle */
+        .form-group label.toggle-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .form-group label.toggle-label .toggle-text {
+            margin-right: 10px;
+        }
+
+        /* Estilos para Layout de Cores em Grade/Linhas */
+        .color-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;              /* reduz gap horizontal */
+            margin: 8px 4px 14px;   /* aproxima do centro e das bordas do card */
+        }
+        .color-row:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .color-grid-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;  
+            min-width: 80px;        /* ligeiramente menor para compactar melhor */
+        }
+
+        .color-grid-item label {
+            font-weight: bold;
+            color: #cccccc;
+            margin-bottom: 4px;     /* menos espaÃ§o entre tÃ­tulo e seletor */
+            font-size: 0.9em;
+            text-transform: uppercase;
+            text-align: center;
+            width: 100%;
+        }
+        /* Fim dos Estilos para Layout de Cores */
+
+        .settings-section {
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 18px;
+            background: rgba(0,0,0,0.72);
+            border: 1px solid rgba(255,255,255,0.06);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.85);
+        }
+        /* Cores de cards por funÃ§Ã£o (seguindo SYSTEM_HTML.h) */
+        .section-leds {
+            border-color: rgba(57,160,255,0.65);
+            background: linear-gradient(180deg, rgba(57,160,255,0.16), rgba(7,9,16,1));
+        }
+        .section-modo {
+            border-color: rgba(124,58,237,0.6);
+            background: linear-gradient(180deg, rgba(124,58,237,0.18), rgba(9,8,18,1));
+        }
+        .section-levels,
+        .section-lock {
+            border-color: rgba(57,160,255,0.8);
+            background: linear-gradient(180deg, rgba(57,160,255,0.14), rgba(5,18,24,1));
+        }
+        .section-presets {
+            border-color: rgba(57,160,255,0.8);
+            background: linear-gradient(180deg, rgba(57,160,255,0.16), rgba(4,10,6,1));
+        }
+        .section-swglobal {
+            border-color: rgba(57,160,255,0.8);
+            background: linear-gradient(180deg, rgba(57,160,255,0.18), rgba(7,9,16,1));
+        }
+        .section-system {
+            border-color: rgba(57,160,255,0.8);
+            background: linear-gradient(180deg, rgba(57,160,255,0.10), rgba(5,7,10,1));
+        }
+        .section-reset {
+            border-color: rgba(255,165,0,0.9);
+            background: linear-gradient(180deg, rgba(255,165,0,0.20), rgba(9,8,18,1));
+        }
+        .settings-section h2 {
+            font-size: 1.2em;
+            color: #e6eef6;
+            margin-top: 0;
+            margin-bottom: 14px;
+            padding-bottom: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 800;
+            border-bottom: none;
+        }
+        .settings-section h2::before {
+            content:'';
+            width:10px;
+            height:10px;
+            border-radius:4px;
+            background:#39a0ff;
+            box-shadow:0 0 10px rgba(57,160,255,0.9);
+        }
+
+        .preset-levels-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .preset-level-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #ff5c5c; /* borda vermelha = desativado */
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.0em;
+            transition:
+              background-color 0.16s ease,
+              color 0.16s ease,
+              border-color 0.16s ease,
+              transform 0.05s ease-in-out;
+            background-color: #2b2f36; /* fundo escuro = desativado */
+            color: #ff5c5c; /* texto vermelho = desativado */
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            user-select: none;
+        }
+        .preset-level-box:active { transform: scale(0.98); }
+
+        .lock-button {
+            width: 120px;
+            height: 44px;
+            font-size: 1.0em;
+            letter-spacing: 0.5px;
+        }
+
+        /* Estado visual: azul = ativo (igual estilo ON), vermelho = desativado */
+        .preset-level-box.selected {
+            border-color: #39a0ff;
+            background-color: #0b1624;
+            color: #39a0ff;
+            box-shadow: 0 0 10px rgba(57,160,255,0.55);
+        }
+        /* LOCK SETUP/GLOBAL: ativo = VERMELHO (alerta), inativo = visual igual PRESET LEVELS (azul) */
+        #lockButtonsContainer .preset-level-box {
+            /* estado inativo segue o preset padrÃ£o azul (borda/texto azul, fundo escuro) */
+            border-color: #39a0ff;
+            color: #39a0ff;
+            background-color: #0b1624;
+            box-shadow: 0 0 10px rgba(57,160,255,0.0);
+        }
+        #lockButtonsContainer .preset-level-box.selected {
+            /* estado ATIVO invertido para vermelho: destaque de bloqueio */
+            border-color: #ff5c5c;
+            color: #ff5c5c;
+            background-color: #2b2f36;
+            box-shadow: 0 0 10px rgba(255,92,92,0.55);
+        }
+
+        .switch-config-area {
+            padding: 14px 14px 12px 14px;
+            margin-top: 12px;
+            border-radius: var(--radius);
+            background:
+              radial-gradient(circle at top left, rgba(57,160,255,0.06), transparent 70%),
+              radial-gradient(circle at bottom right, rgba(255,255,255,0.02), transparent 70%),
+              var(--bg-soft);
+            border: 1px solid var(--accent);
+            box-shadow: var(--shadow-soft);
+        }
+        .switch-config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .extras-section { padding:15px; margin-top:15px; background-color:#1d2226; border-radius:6px; border: 1px solid rgba(255,255,255,0.06); text-align:left; }
+        .extras-section h3 { color: #87CEEB; font-size: 1em; text-transform: uppercase; margin-top:0; margin-bottom:12px; border-bottom: 1px solid #555; padding-bottom: 8px;}
+        .extras-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+        .extras-group { margin-bottom:10px; padding:10px; background-color: #171a1d; border-radius:4px;} 
+        .extras-group h4 {font-size:0.9em; margin:0 0 8px 0; color:#ddd;}
+        .spin-values-row { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+        .spin-value-item { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+        .spin-value-item label { margin-bottom: 4px; font-size: 0.8em; color: #bbb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .control-inline-group { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .control-cc-container { flex: 2; min-width: 0; }
+        .control-toggle-container { flex: 3; display: flex; flex-direction: column; }
+        .control-toggle-container .toggle-label-custom-text { font-size: 0.8em; color: #bbb; margin-bottom: 3px; display: block; }
+        .custom-inline-group { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .custom-value-container { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+        /* Estilos para a barra de progresso (copiado de PRESET_CONFIG) */
+        .spin-knob-placeholder {
+            height: 20px;
+            background-color: #2e2e2e;
+            border: 1px solid #555555;
+            border-radius: 4px;
+            margin-top: 5px;
+            padding: 2px;
+            box-sizing: border-box;
+        }
+        .spin-knob-progress-bar {
+            height: 100%;
+            width: 0%; /* Controlado por JS */
+            background-color: #87CEEB;
+            border-radius: 3px;
+            transition: width 0.2s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .spin-knob-progress-bar span {
+            color: #333;
+            font-size: 0.75em;
+            font-weight: bold;
+            white-space: nowrap;
+            padding: 0 3px;
+        }
+
+        /* BotÃµes retangulares estilo toggle (para DISPLAY) */
+        .rect-toggle-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        /* Linha DISPLAY (CADEIA / SIGLA FX / BACK) com botÃµes de mesma largura */
+        .display-toggle-row {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 10px;
+        }
+        .display-toggle-row .rect-toggle {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+        .rect-toggle {
+            min-width: 110px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 2px solid #666;
+            background: linear-gradient(180deg,#151922,#10141c);
+            color: #cfe7ff;
+            font-weight: 600;
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.55);
+            transition:
+              background-color var(--transition-fast),
+              border-color var(--transition-fast),
+              color var(--transition-fast),
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast);
+        }
+        .rect-toggle span {
+            pointer-events: none;
+        }
+        .rect-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(0,0,0,0.75);
+        }
+        /* MOSTRAR TELA FX: azul ON / vermelho OFF */
+        .rect-toggle-fx-off {
+            border-color: #ff5c5c;
+            color: #ff9f9f;
+        }
+        .rect-toggle-fx-on {
+            border-color: #39a0ff;
+            color: #39a0ff;
+        }
+        /* SIGLA FX LIVE MODE: roxo/amarelo (hÃ­brido) */
+        .rect-toggle-fx-live {
+            border-color: #9b59b6;
+            color: #f39c12;
+        }
+        /* BACKGROUND: cinza OFF (BACK PADRÃƒO) / azul ON (BACK COLOR) */
+        .rect-toggle-bg-off {
+            border-color: #777;
+            color: #bbbbbb;
+        }
+        .rect-toggle-bg-on {
+            border-color: #39a0ff;
+            color: #39a0ff;
+        }
+
+        /* Estilos para Dropdown Customizado */
+        .custom-select-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+
+        .custom-select-trigger {
+            position: relative;
+            display: block;
+            width: 100%;
+            padding: 10px;
+            padding-right: 35px;
+            font-size: 1em;
+            color: #e6eef6;
+            background-color: var(--bg-soft);
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+            cursor: pointer;
+            box-sizing: border-box;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-shadow: 0 0 10px rgba(57,160,255,0.35);
+        }
+        .custom-select-wrapper .custom-select-trigger:focus,
+        .custom-select-wrapper.open .custom-select-trigger { border-color: var(--focus); outline: none; }
+
+        .custom-select-trigger::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid #bbbbbb;
+            transition: transform 0.2s ease;
+        }
+
+        .custom-select-wrapper.open .custom-select-trigger::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .custom-options-panel {
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 0;
+            right: 0;
+            background-color: var(--bg-soft);
+            border: 1px solid var(--accent);
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .custom-select-wrapper.open .custom-options-panel {
+            display: block;
+        }
+        /* While editing/open: list container border becomes orange */
+        .custom-select-wrapper.open .custom-options-panel { border-color: var(--focus); }
+
+        .custom-option {
+            padding: 10px;
+            color: #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .custom-option:hover {
+            background-color: #777777;
+        }
+
+        .custom-option.selected {
+            background-color: #6a6a6a;
+            font-weight: bold;
+        }
+
+        /* Esconder o select original */
+        .custom-select-wrapper select {
+            display: none !important;
+        }
+
+        .floating-footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(7,9,16,0.98);
+            padding: 10px 0;
+            box-shadow: 0 -2px 18px rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            backdrop-filter: blur(12px);
+            box-sizing: border-box;
+        }
+        .floating-footer-bar .btn-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 580px;
+            margin-top: 0;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
+        /* BotÃµes flutuantes personalizados */
+        .floating-footer-bar .btn-voltar,
+        .floating-footer-bar .btn-salvar {
+            background: transparent;
+            box-shadow: none;
+            height: 40px;
+            min-width: 150px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition:
+              transform var(--transition-fast),
+              box-shadow var(--transition-fast),
+              background-color var(--transition-fast),
+              color var(--transition-fast),
+              border-color var(--transition-fast);
+        }
+
+        .floating-footer-bar .btn-salvar {
+            border: 2px solid var(--success);
+            color: var(--success);
+        }
+
+        .floating-footer-bar .btn-salvar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.8);
+            background-color: rgba(76,175,80,0.06);
+        }
+
+        .floating-footer-bar .btn-voltar {
+            border: 2px solid #ff00aa; /* magenta */
+            color: #ff00aa;
+        }
+
+        .floating-footer-bar .btn-voltar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.8);
+            background-color: rgba(255,0,170,0.06);
+        }
+
+        .btn-reset {
+            background: transparent;
+            color: #ffffff;
+            border: 2px solid #ffffff;
+        }
+
+        /* INICIO AUTOMATICO - Botoes unicos */
+        .section-autostart {
+            border-color: rgba(57,160,255,0.8);
+            background: linear-gradient(180deg, rgba(57,160,255,0.16), rgba(7,9,16,1));
+        }
+        .autostart-single-box {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--accent), #1b6abf);
+            border: 2px solid var(--accent);
+            border-radius: 10px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(57,160,255,0.4);
+        }
+        .autostart-single-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(57,160,255,0.6);
+        }
+        .autostart-single-box:active {
+            transform: scale(0.95);
+        }
+
+    </style>
+    <!-- (Overrides antigos simplificados; DESIGN.md consolidado acima) -->
+    <style>
+      .save-banner {
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #27ae60; /* verde */
+        color: #ffffff;
+        padding: 16px 28px;
+        border-radius: 12px;
+        font-weight: bold;
+        z-index: 2000;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+        opacity: 0;
+        transition: opacity 0.12s ease-in-out;
+        pointer-events: none;
+        display: none;
+        font-size: 1.5em;
+      }
+      .save-banner.show {
+        display: block;
+        opacity: 1;
+      }
+
+      /* Page background + primary text color */
+      /* (SubstituÃ­do pelo novo layout .page/.card semelhante ao SYSTEM_html.h) */
+
+      /* Form inputs: keep sizes, update colors to match theme */
+      .form-group input[type="number"],
+      .form-group input[type="text"],
+      .form-group select,
+      .form-group input[type="color"] {
+        background: var(--bg-soft);
+        border: 1px solid var(--accent);
+        color: #e6eef6;
+      }
+
+      /* Labels and muted text */
+      .form-group label { color: #cfe7ff; }
+      #statusMessage { color: var(--muted); }
+
+      /* Buttons: keep same dimensions but use theme colors */
+      .btn { background: linear-gradient(180deg,#e6f7ff,#cfeaff); color: #071025; }
+      .btn-save { background: linear-gradient(180deg,var(--accent),#7be0ff); color: #071025; }
+      .btn-reset { background: linear-gradient(180deg,#ff5c5c,#ff7a7a); color: #071025; }
+
+      /* Small accent for interactive elements */
+      .color-options-panel .color-swatch:hover { border-color: rgba(57,160,255,0.35); }
+
+    </style>
+
+    <!-- Minimal theme overrides (cores e fontes apenas) -->
+    <style>
+      :root{
+        --accent: #39a0ff;
+        --muted: #aab3bd;
+        --glass: rgba(255,255,255,0.03);
+        --card-border: rgba(255,255,255,0.03);
+        --focus:#ff8800;
+      }
+      body {
+        background: linear-gradient(180deg,#0f1113 0%, #15181a 100%);
+        color: #e6eef6;
+        font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      }
+      .container {
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border: 1px solid var(--card-border);
+      }
+      .form-group label { color: #cfe7ff; }
+      .btn { background: linear-gradient(180deg,#e6f7ff,#cfeaff); color:#071025; }
+      .btn-save { background: linear-gradient(180deg,var(--accent),#7be0ff); color:#071025; }
+>>>>>>> Global styles mantidos para demais botoes; floating-footer usa classes especificas
+      #statusMessage { color: var(--muted); }
+    </style>
+
+  <script src="/js/parity-bridge-client.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">BFMiDI</div>
+        <div>
+          <h1>CONFIG GLOBAIS</h1>
+          <div class="subtitle">Firmware: <span id="fwMain" class="fw-version">%%FIRMWARE_VERSION%%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Corrige placeholder caso o firmware nao seja injetado no HTML bruto
+      window.addEventListener('DOMContentLoaded', function () {
+        try {
+          var fwEl = document.getElementById('fwMain');
+          if (!fwEl) return;
+          var txt = (fwEl.textContent || fwEl.innerText || '').trim();
+
+          if (txt === '%%FIRMWARE_VERSION%%' || txt === '%%FIRMWARE-VERSION%%') {
+            fetch('/api/system/info')
+              .then(function (r) { return r.ok ? r.json() : null; })
+              .then(function (info) {
+                if (info && info.firmwareVersion) {
+                  fwEl.textContent = info.firmwareVersion;
+                }
+              })
+              .catch(function () {});
+          }
+        } catch (e) {}
+      });
+    </script>
+
+    <div class="grid">
+      <div class="card">
+        <form id="globalConfigForm">
+            <!-- CARD: DISPLAY -->
+            <div class="settings-section section-leds">
+                <h2>DISPLAY</h2>
+
+                <!-- Linha de botoes retangulares (DISPLAY: CADEIA / SIGLA FX / BACK PADRAO) -->
+                <div class="form-group">
+                    <div class="rect-toggle-row display-toggle-row">
+                        <!-- SHOW FX: ativa envio MIDI especial em modos HX STOMP / AMPERO X -->
+                        <button type="button"
+                                id="btnMostrarCadeia"
+                                class="rect-toggle rect-toggle-fx-off"
+                                data-target-checkbox="mostrarCadeia"
+                                style="display:none;">
+                            <span>SHOW FX</span>
+                        </button>
+
+                        <!-- GIG VIEW (SEMPRE / LIVE MODE) -->
+                        <div style="display:flex; flex-direction:column; align-items:center;">
+                            <span style="font-weight:bold; color:#ddd; font-size:12px; margin-bottom:4px;">GIG VIEW</span>
+                            <button type="button"
+                                    id="btnMostrarFxQuando"
+                                    class="rect-toggle rect-toggle-fx-on"
+                                    data-target-checkbox="mostrarFxQuando">
+                                <span id="btnMostrarFxQuandoLabel">SEMPRE VISIVEL</span>
+                            </button>
+                        </div>
+
+                        <!-- BACKGROUND: OFF = BACK PADRAO (cinza) / ON = BACK COLOR (azul) -->
+                        <button type="button"
+                                id="btnBackgroundMode"
+                                class="rect-toggle rect-toggle-bg-off"
+                                data-target-checkbox="bgColorEnabled">
+                            <span id="btnBackgroundModeLabel">BACK PADRAO</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Checkboxes reais ocultos (compativeis com backend) -->
+                <!-- SHOW FX SCREEN (legado): usada para mostrar tela/CADEIA FX em firmwares antigos -->
+                <input type="checkbox" id="mostrarTelaFX" name="mostrarTelaFX" style="display:none;">
+                <!-- CADEIA: reutiliza a variavel SHOW FX SCREEN existente no firmware -->
+                <input type="checkbox" id="mostrarCadeia" name="mostrarCadeia" style="display:none;">
+                <!-- FX DISPLAY: modo (SIGLAS/ICONES/OFF) + quando (SEMPRE/LIVE MODE) -->
+                <input type="hidden" id="mostrarFxModo" name="mostrarFxModo" value="1">
+                <input type="hidden" id="mostrarFxQuando" name="mostrarFxQuando" value="0">
+                <input type="checkbox" id="bgColorEnabled" name="bgColorEnabled" style="display:none;">
+
+                <!-- Seletor de cor do BACKGROUND (mostrado so quando BACK COLOR ON) -->
+                <div class="form-group" id="backgroundColorPickerGroup" style="display:none;">
+                    <div class="custom-color-selector">
+                        <div id="backgroundSelectedColorPreview" class="selected-color-preview" tabindex="0">
+                            <div id="backgroundSelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARD: LEDS -->
+            <div class="settings-section section-leds">
+                <h2>LEDS</h2>
+                <div class="form-group" style="display:flex; gap:10px;">
+                    <button type="button"
+                            id="ledBrilhoButton"
+                            class="rect-toggle rect-toggle-fx-on"
+                            style="flex:1; height:48px;">
+                        BRILHO LED 60%
+                    </button>
+
+                    <button type="button"
+                            id="ledPreviewButton"
+                            class="rect-toggle rect-toggle-fx-off"
+                            style="flex:1; height:48px;">
+                        <span>LED PREVIEW OFF</span>
+                    </button>
+                    <!-- checkbox oculto para manter compatibilidade com backend -->
+                    <input type="checkbox" id="ledPreview" name="ledPreview" style="display:none;">
+                </div>
+            </div>
+
+            <div class="settings-section section-modo">
+                <h2>MODO AMIGAVEL</h2>
+                <div class="form-group">
+                    <label for="modoMidi">MODO MIDI:</label>
+                    <select id="modoMidi" name="modoMidi">
+                        <option value="GLOBAL">GLOBAL</option>
+                        <option value="AMPERO AS2">AMPERO AS2</option>
+                        <option value="AMPERO MINI">AMPERO MINI</option>
+                        <option value="HX STOMP">HX STOMP</option>
+                        <option value="A. STAGE 2">A. STAGE 2</option>
+                        <option value="GP-200LT">GP-200LT</option>
+                        <option value="VALETON GP5">VALETON GP5</option>
+                        <option value="POCKET MASTER">POCKET MASTER</option>
+                        <option value="TONEX">TONEX</option>
+                        <option value="KEMPER PLAYER">KEMPER PLAYER</option>
+                        <option value="AMPERO MP350">AMPERO MP350</option>
+                        <option value="MX5">MX5</option>
+                        <option value="NANO CORTEX">NANO CORTEX</option>
+                        <option value="QUAD CORTEX">QUAD CORTEX</option>
+                    </select>
+                </div>
+
+
+            </div>
+
+            <!-- CARD: INICIO AUTOMATICO -->
+            <div class="settings-section section-autostart">
+                <h2>INICIO AUTOMATICO</h2>
+                <div class="form-group" style="display:flex; align-items:center; justify-content:center; gap:12px;">
+                    <button type="button" id="autoStartToggleBtn" class="rect-toggle rect-toggle-fx-off" style="width:90px; height:48px;">
+                        <span id="autoStartToggleLabel">OFF</span>
+                    </button>
+                    <button type="button" id="autoStartRowBtn" class="autostart-single-box">
+                        <span id="autoStartRowLabel">A</span>
+                    </button>
+                    <button type="button" id="autoStartColBtn" class="autostart-single-box">
+                        <span id="autoStartColLabel">1</span>
+                    </button>
+                    <input type="checkbox" id="autoStartEnabled" name="autoStartEnabled" style="display:none;">
+                    <input type="hidden" id="autoStartRow" name="autoStartRow" value="0">
+                    <input type="hidden" id="autoStartCol" name="autoStartCol" value="0">
+                </div>
+                <div class="form-group" style="display:flex; align-items:center; justify-content:center; margin-top:10px;">
+                    <button type="button" id="autoStartLiveModeBtn" class="rect-toggle rect-toggle-fx-off" style="width:180px; height:42px;">
+                        <span id="autoStartLiveModeLabel">PRESET MODE</span>
+                    </button>
+                    <input type="checkbox" id="autoStartLiveMode" name="autoStartLiveMode" style="display:none;">
+                </div>
+            </div>
+
+            <div class="settings-section section-levels">
+                <h2>PRESET LEVELS</h2>
+                <div class="preset-levels-selector" id="presetLevelsContainer">
+                    <div class="preset-level-box" data-level="A">A</div>
+                    <div class="preset-level-box" data-level="B">B</div>
+                    <div class="preset-level-box" data-level="C">C</div>
+                    <div class="preset-level-box" data-level="D">D</div>
+                    <div class="preset-level-box" data-level="E">E</div>
+
+                </div>
+            </div>
+
+            <div class="settings-section section-lock">
+                <h2>LOCK</h2>
+                <div class="preset-levels-selector" id="lockButtonsContainer">
+                    <div class="preset-level-box lock-button" id="lockSetupBtn" data-lock="setup">SETUP</div>
+                    <div class="preset-level-box lock-button" id="lockGlobalBtn" data-lock="global">GLOBAL</div>
+                </div>
+            </div>
+
+            <div class="settings-section section-presets">
+                <h2>PRESET LEDS</h2>
+
+                <!-- Toggle LED LETRAS / LED NUMEROS -->
+                <div class="form-group" style="margin-bottom: 12px; text-align: center;">
+                    <button type="button" id="ledModeToggleButton" class="rect-toggle rect-toggle-fx-on" style="width: 100%; height: 48px;">
+                        <span id="ledModeToggleLabel">LED LETRAS</span>
+                    </button>
+                    <input type="checkbox" id="ledModeNumeros" name="ledModeNumeros" style="display:none;">
+                </div>
+
+                <!-- 1a linha: PRESET A, B, C -->
+                <div class="color-row">
+                    <div class="color-grid-item">
+                        <label id="presetALabel">PRESET A:</label>
+                        <div class="custom-color-selector">
+                            <div id="presetASelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="presetASelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="color-grid-item">
+                        <label id="presetBLabel">PRESET B:</label>
+                        <div class="custom-color-selector">
+                            <div id="presetBSelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="presetBSelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="color-grid-item">
+                        <label id="presetCLabel">PRESET C:</label>
+                        <div class="custom-color-selector">
+                            <div id="presetCSelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="presetCSelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2a linha: PRESET D, PRESET E, PRESET F -->
+                <div class="color-row">
+                    <div class="color-grid-item">
+                        <label id="presetDLabel">PRESET D:</label>
+                        <div class="custom-color-selector">
+                            <div id="presetDSelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="presetDSelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="color-grid-item">
+                        <label id="presetELabel">PRESET E:</label>
+                        <div class="custom-color-selector">
+                            <div id="presetESelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="presetESelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="color-grid-item" id="presetFColorItem" style="display:none;">
+                        <label id="presetFLabel">SW 6:</label>
+                        <div class="custom-color-selector">
+                            <div id="presetFSelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="presetFSelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CARD: LIVE MODE -->
+            <div class="settings-section section-presets">
+                <h2>LIVE MODE</h2>
+
+                <div class="color-row">
+                    <div class="color-grid-item">
+                        <label>MODO LIVE 1</label>
+                        <div class="custom-color-selector">
+                            <div id="liveModeSelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="liveModeSelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="color-grid-item">
+                        <label>MODO LIVE 2</label>
+                        <div class="custom-color-selector">
+                            <div id="liveMode2SelectedColorPreview" class="selected-color-preview" tabindex="0">
+                                <div id="liveMode2SelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px; text-align: center;">
+                    <label style="display:block; margin-bottom:6px;">LAYER 2 (LIVE MODE)</label>
+                    <button type="button" id="liveLayer2ToggleButton" class="live-layer-btn">
+                        <span id="liveLayer2ToggleLabel">Layer 2 ON</span>
+                    </button>
+                    <input type="checkbox" id="liveLayer2Enabled" name="liveLayer2Enabled" style="display:none;">
+                </div>
+
+            </div>
+
+            <div class="settings-section section-swglobal">
+                <h2>SW GLOBAL</h2>
+                <div class="switch-config-area" id="switchConfigArea">
+                    <div class="switch-config-grid">
+                        <div class="form-group">
+                            <label for="switchMode">Modo:</label>
+                            <div class="custom-select-wrapper" data-select-id="switchMode">
+                                <select id="switchMode" name="switchMode"></select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="ccFieldFormGroup">
+                            <label for="switchCC">CC:</label>
+                            <div class="custom-select-wrapper" data-select-id="switchCC">
+                                <select id="switchCC" name="switchCC"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="switch-config-grid">
+                         <div class="form-group">
+                            <label>Start:</label>
+                            <label class="toggle-label">
+                                <input type="checkbox" id="switchStart" name="switchStart">
+                                <span class="toggle-switch"><span class="toggle-slider"></span></span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="switchChannel">CH:</label>
+                            <div class="custom-select-wrapper" data-select-id="switchChannel">
+                                <select id="switchChannel" name="switchChannel"></select>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="form-group">
+                        <label for="switchLedColorValue">LED:</label>
+                        <div class="custom-color-selector">
+                            <div id="selectedLedColorPreview" class="selected-color-preview" tabindex="0">
+                                 <div id="selectedLedColorPreviewBox" class="selected-color-preview-box"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dynamicModeConfigArea" class="switch-config-area" style="display:none; margin-top: 12px;">
+                </div>
+            </div>
+
+            <div class="settings-section section-system">
+                <h2>CHAMADA DE PRESETS</h2>
+                <div class="form-group">
+                    <label for="selectModeIndex">SET PRESET (Modo de Selecao):</label>
+                    <select id="selectModeIndex" name="selectModeIndex">
+                        <option value="0">Modo 1 (Curto/Longo)</option>
+                        <option value="1">Modo 2 (Apenas Curto)</option>
+                        <option value="2">Modo 3 (Curto p/ Slow)</option>
+                    </select>
+                </div>
+            </div>
+
+        </form>
+        <div id="statusMessage"></div>
+      </div>
+    </div>
+
+    <div class="floating-footer-bar">
+      <div class="btn-container">
+        <button type="button" class="btn btn-voltar" onclick="window.location.href='/'">Voltar</button>
+        <button type="submit" form="globalConfigForm" class="btn btn-salvar">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+
+    <script>
+        function showSavedBanner() {
+            const bannerId = 'saveBanner';
+            let banner = document.getElementById(bannerId);
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = bannerId;
+                banner.className = 'save-banner';
+                banner.setAttribute('aria-hidden', 'true');
+                banner.textContent = 'SALVO!';
+                document.body.appendChild(banner);
+            }
+            banner.classList.add('show');
+            banner.setAttribute('aria-hidden', 'false');
+            banner.style.display = 'block';
+            // Hide after 500ms (fade out quickly)
+            setTimeout(() => {
+                banner.classList.remove('show');
+                banner.setAttribute('aria-hidden', 'true');
+                setTimeout(() => { banner.style.display = 'none'; }, 150);
+            }, 500);
+        }
+
+        const form = document.getElementById('globalConfigForm');
+        const statusMessage = document.getElementById('statusMessage');
+        const ledBrilhoButton = document.getElementById('ledBrilhoButton');
+        let ledBrilho = 3; // 1..5 => 20..100%
+        
+        const modoMidiSelect = document.getElementById('modoMidi');
+        let selectedBackgroundColorUint32 = 0;
+
+        const PRESET_COLORS = [
+            { name: "Vermelho", hex: "#FF0000", uint32: 0xFF0000 },
+            { name: "Verde",    hex: "#00FF00", uint32: 0x00FF00 },
+            { name: "Azul",     hex: "#0000FF", uint32: 0x0000FF },
+            { name: "Amarelo",  hex: "#FFFF00", uint32: 0xFFFF00 },
+            { name: "Roxo",     hex: "#800080", uint32: 0x800080 },
+            { name: "Cyan",     hex: "#00FFFF", uint32: 0x00FFFF },
+            { name: "Branco",   hex: "#FFFFFF", uint32: 0xFFFFFF },
+            { name: "Laranja",  hex: "#FF5000", uint32: 0xFF5000 }, // 255, 80, 0
+            { name: "Magenta",  hex: "#FF0080", uint32: 0xFF0080 }  // 255, 0, 128
+        ];
+        const BACKGROUND_COLORS = [...PRESET_COLORS, { name: "Preto", hex: "#000000", uint32: 0x000000 }];
+
+        const modoMidiOptionsValues = ["GLOBAL", "AMPERO AS2", "AMPERO MINI", "HX STOMP", "A. STAGE 2", "GP-200LT", "VALETON GP5", "POCKET MASTER", "TONEX", "KEMPER PLAYER", "AMPERO MP350", "MX5", "NANO CORTEX", "QUAD CORTEX"];
+
+        let lockSetup = false;
+        let lockGlobal = false;
+
+        function hexToUint32(hex) {
+            return parseInt(hex.replace("#", ""), 16);
+        }
+
+        function uint32ToHex(uint32) {
+            let hex = uint32.toString(16);
+            while (hex.length < 6) {
+                hex = "0" + hex;
+            }
+            return "#" + hex;
+        }
+
+                let selectedPresetColorsUint32 = [0,0,0,0,0,0]; // A-E + F (6 para LED NUMEROS)
+        let selectedLiveModeColorUint32 = 0;
+        let selectedLiveMode2ColorUint32 = 0;
+        let selectedSwGlobalLedIndex = 0; // Para a cor do LED do SW Global
+        let selectedSwGlobalLed2Index = 0; // Para a cor do LED2 (CC2 longo)
+        let presetLevels = [true, true, true, true, true]; // A, B, C, D, E
+        let ledModeNumeros = false; // false = LED LETRAS (A-F), true = LED NUMEROS (1-6)
+
+        let swGlobalConfig = {};
+
+        function normalizeSwGlobalConfig(cfg) {
+            if (!cfg) return {};
+            if (cfg.spin_send_pc === undefined) cfg.spin_send_pc = false;
+            if (cfg.cc2 === undefined) cfg.cc2 = 0;
+            if (cfg.start_value_cc2 === undefined) cfg.start_value_cc2 = false;
+            if (cfg.canal_cc2 === undefined && cfg.cc2_ch !== undefined) {
+                const ch = parseInt(cfg.cc2_ch, 10);
+                if (!Number.isNaN(ch)) cfg.canal_cc2 = ch;
+            }
+            if (cfg.cc2_ch === undefined && cfg.canal_cc2 !== undefined) {
+                const ch = parseInt(cfg.canal_cc2, 10);
+                if (!Number.isNaN(ch)) cfg.cc2_ch = ch;
+            }
+            if (cfg.led2 === undefined) cfg.led2 = 0;
+            if ((cfg.modo >= 19 && cfg.modo <= 21) || (cfg.modo >= 41 && cfg.modo <= 43)) {
+                cfg.modo = 1;
+                cfg.spin_send_pc = true;
+            }
+            return cfg;
+        }
+
+        function syncSpinSendPcGlobal(desiredValue, isSpinMode = true) {
+            const cb = document.getElementById('spinSendPcToggle_global');
+            const btn = document.getElementById('spinSendPcBtn_global');
+            if (!cb || !btn) return;
+            if (typeof desiredValue === 'boolean') cb.checked = desiredValue;
+            const ccField = document.getElementById('ccFieldFormGroup');
+            if (cb.checked) {
+                btn.classList.add('active', 'pc-mode');
+                btn.classList.remove('cc-mode');
+                btn.setAttribute('aria-pressed','true');
+                btn.textContent = 'ENVIAR PC';
+                if (isSpinMode && ccField) ccField.style.display = 'none';
+            } else {
+                btn.classList.add('cc-mode');
+                btn.classList.remove('pc-mode');
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed','false');
+                btn.textContent = 'ENVIAR CC';
+                if (ccField) ccField.style.display = 'block';
+            }
+        }
+
+        const MODE_OPTIONS_WEB = [
+            { value: 0, text: "STOMP" }, { value: 1, text: "SPIN1" }, 
+            { value: 4, text: "RAMPA" }, { value: 10, text: "CUSTOM1" }, 
+            { value: 17, text: "FAVORITE" },
+            { value: 18, text: "TAP TEMPO" }
+        ];
+
+        function createCustomColorSelector(previewId, panelId, colorArray, storageUpdateCallback, initialColorValue, isIndexBased = false) {
+            const previewElement = document.getElementById(previewId); 
+            const previewBoxElement = previewElement.querySelector('.selected-color-preview-box');
+
+            let overlayElement = document.getElementById(panelId + '-overlay');
+            if (!overlayElement) {
+                overlayElement = document.createElement('div');
+                overlayElement.id = panelId + '-overlay';
+                overlayElement.classList.add('color-options-panel-overlay');
+                document.body.appendChild(overlayElement);
+
+                const panelElement = document.createElement('div');
+                panelElement.id = panelId;
+                panelElement.classList.add('color-options-panel');
+                overlayElement.appendChild(panelElement);
+            }
+            const panelElement = overlayElement.querySelector('.color-options-panel');
+
+            panelElement.innerHTML = '';
+            const titleElement = document.createElement('div');
+            titleElement.classList.add('color-options-panel-title');
+            titleElement.textContent = 'SELECIONE A COR';
+            panelElement.appendChild(titleElement);
+
+            colorArray.forEach((color, index) => {
+                const swatch = document.createElement('div');
+                swatch.classList.add('color-swatch');
+                swatch.style.backgroundColor = color.hex;
+                swatch.dataset.value = isIndexBased ? index : color.uint32;
+                swatch.title = color.name;
+
+                swatch.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    const valueToStore = isIndexBased ? index : color.uint32;
+                    if (previewBoxElement) {
+                        previewBoxElement.style.backgroundImage = `linear-gradient(to right, black 2%, ${color.hex} 50%, black 98%)`;
+                    } else {
+                        previewElement.style.backgroundImage = `linear-gradient(to right, black 2%, ${color.hex} 50%, black 98%)`;
+                    }
+                    storageUpdateCallback(valueToStore);
+                    overlayElement.classList.remove('active');
+                });
+                panelElement.appendChild(swatch);
+            });
+
+            previewElement.addEventListener('click', (event) => {
+                event.stopPropagation();
+                // Close other open panels first
+                document.querySelectorAll('.color-options-panel-overlay.active').forEach(openOverlay => {
+                    if (openOverlay !== overlayElement) {
+                        openOverlay.classList.remove('active');
+                    }
+                });
+                // Toggle the current panel
+                overlayElement.classList.toggle('active');
+            });
+
+            const initialColor = isIndexBased 
+                ? (colorArray[initialColorValue] || colorArray[0])
+                : (colorArray.find(c => c.uint32 === initialColorValue) || colorArray[0]);
+            
+            if (previewBoxElement) {
+                previewBoxElement.style.backgroundImage = `linear-gradient(to right, black 2%, ${initialColor.hex} 50%, black 98%)`;
+            } else {
+                previewElement.style.backgroundImage = `linear-gradient(to right, black 2%, ${initialColor.hex} 50%, black 98%)`;
+            }
+            storageUpdateCallback(isIndexBased ? (colorArray.indexOf(initialColor)) : initialColor.uint32);
+        }
+
+        document.addEventListener('click', function(event) {
+            // Close any active overlay if the click is outside of its panel
+            document.querySelectorAll('.color-options-panel-overlay.active').forEach(openOverlay => {
+                const panel = openOverlay.querySelector('.color-options-panel');
+                if (panel && !panel.contains(event.target) && !event.target.closest('.selected-color-preview')) {
+                     openOverlay.classList.remove('active');
+                }
+            });
+        });
+
+        function initializeCustomSelect(selectElement) {
+            if (!selectElement) return;
+            
+            // Find the wrapper. The HTML might already have it.
+            let wrapper = selectElement.closest('.custom-select-wrapper');
+            
+            // If the wrapper already has the trigger, it's initialized.
+            if (wrapper && wrapper.querySelector('.custom-select-trigger')) {
+                return;
+            }
+
+            // If no wrapper, create one and move the select inside.
+            if (!wrapper) {
+                wrapper = document.createElement('div');
+                wrapper.classList.add('custom-select-wrapper');
+                selectElement.parentNode.insertBefore(wrapper, selectElement);
+                wrapper.appendChild(selectElement);
+            }
+
+            const trigger = document.createElement('div');
+            trigger.classList.add('custom-select-trigger');
+            wrapper.appendChild(trigger);
+
+            const optionsPanel = document.createElement('div');
+            optionsPanel.classList.add('custom-options-panel');
+            wrapper.appendChild(optionsPanel);
+
+            function updateTriggerText() {
+                const selectedOption = selectElement.options[selectElement.selectedIndex];
+                trigger.textContent = selectedOption ? selectedOption.text : '';
+                const currentCustomSelected = optionsPanel.querySelector('.custom-option.selected');
+                if (currentCustomSelected) currentCustomSelected.classList.remove('selected');
+                const newCustomSelected = Array.from(optionsPanel.children).find(opt => opt.dataset.value === selectElement.value);
+                if (newCustomSelected) newCustomSelected.classList.add('selected');
+            }
+
+            Array.from(selectElement.options).forEach(optionNode => {
+                const customOption = document.createElement('div');
+                customOption.classList.add('custom-option');
+                customOption.textContent = optionNode.text;
+                customOption.dataset.value = optionNode.value;
+                if (optionNode.selected) customOption.classList.add('selected');
+
+                customOption.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent the document click listener from firing
+                    selectElement.value = optionNode.value;
+                    updateTriggerText();
+                    wrapper.classList.remove('open');
+                    const event = new Event('change', { bubbles: true });
+                    selectElement.dispatchEvent(event);
+                });
+                optionsPanel.appendChild(customOption);
+            });
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Fecha outros dropdowns abertos
+                document.querySelectorAll('.custom-select-wrapper.open').forEach(openWrapper => {
+                    if (openWrapper !== wrapper) {
+                        openWrapper.classList.remove('open');
+                    }
+                });
+                // Alterna o estado do dropdown atual
+                wrapper.classList.toggle('open');
+            });
+
+            updateTriggerText();
+        }
+
+        document.addEventListener('click', function(event) {
+            document.querySelectorAll('.custom-select-wrapper.open').forEach(openWrapper => {
+                if (!openWrapper.contains(event.target)) {
+                    openWrapper.classList.remove('open');
+                }
+            });
+            document.querySelectorAll('.color-options-panel-overlay.active').forEach(openOverlay => {
+                if (event.target === openOverlay) {
+                    openOverlay.style.display = 'none';
+                    openOverlay.classList.remove('active');
+                }
+            });
+        });
+
+        window.addEventListener('load', () => {
+            if (modoMidiSelect) initializeCustomSelect(modoMidiSelect);
+            initializeSwGlobalFields();
+
+            fetch('/api/global-config/read')
+                .then(response => response.json())
+                .then(data => {
+                    ledBrilho = data.ledBrilho || 3;
+                    if (ledBrilhoButton) {
+                        const pct = ledBrilho * 20;
+                        ledBrilhoButton.textContent = 'BRILHO LED ' + pct + '%';
+                    }
+
+                    const ledPreviewCheckbox = document.getElementById('ledPreview');
+                    const ledPreviewButton = document.getElementById('ledPreviewButton');
+                    if (ledPreviewCheckbox && ledPreviewButton) {
+                        ledPreviewCheckbox.checked = !!data.ledPreview;
+                        syncLedPreviewButton();
+                    }
+                    if (modoMidiSelect) {
+                        modoMidiSelect.value = modoMidiOptionsValues[data.modoMidiIndex];
+                        updateCustomSelectVisual(modoMidiSelect);
+                        // Atualiza visibilidade do botao SHOW FX baseado no modo MIDI
+                        updateShowFxButtonVisibility(modoMidiSelect.value);
+                        // Adiciona listener para mudanca de modo MIDI
+                        modoMidiSelect.addEventListener('change', function() {
+                            updateShowFxButtonVisibility(this.value);
+                        });
+                    }
+                    // Estado inicial CADEIA: usa SHOW FX SCREEN legado (mostrarTelaFX)
+                    const mostrarTelaFxCheckbox = document.getElementById('mostrarTelaFX');
+                    const mostrarCadeiaCheckbox = document.getElementById('mostrarCadeia');
+                    const btnMostrarCadeia = document.getElementById('btnMostrarCadeia');
+                    if (mostrarTelaFxCheckbox && mostrarCadeiaCheckbox && btnMostrarCadeia) {
+                        // MantÃ©m compatibilidade: back-end jÃ¡ usa mostrarTelaFX (SHOW FX SCREEN)
+                        const initial = !!data.mostrarTelaFX;
+                        mostrarTelaFxCheckbox.checked = initial;
+                        mostrarCadeiaCheckbox.checked = initial;
+
+                        if (initial) {
+                            btnMostrarCadeia.classList.remove('rect-toggle-fx-off');
+                            btnMostrarCadeia.classList.add('rect-toggle-fx-on');
+                        } else {
+                            btnMostrarCadeia.classList.remove('rect-toggle-fx-on');
+                            btnMostrarCadeia.classList.add('rect-toggle-fx-off');
+                        }
+
+                        btnMostrarCadeia.addEventListener('click', function () {
+                            const next = !mostrarCadeiaCheckbox.checked;
+                            mostrarCadeiaCheckbox.checked = next;
+                            mostrarTelaFxCheckbox.checked = next; // mantÃ©m SHOW FX SCREEN em sync
+
+                            if (next) {
+                                btnMostrarCadeia.classList.remove('rect-toggle-fx-off');
+                                btnMostrarCadeia.classList.add('rect-toggle-fx-on');
+                            } else {
+                                btnMostrarCadeia.classList.remove('rect-toggle-fx-on');
+                                btnMostrarCadeia.classList.add('rect-toggle-fx-off');
+                            }
+                        });
+                    }
+
+                    // Estado inicial MOSTRAR SIGLA FX NO DISPLAY (3 ESTADOS)
+                    // 0 = OFF (vermelho), 1 = PREVIEW (azul/sempre mostra), 2 = LIVE MODE (roxo/hÃ­brido)
+                    const mostrarSiglaFxInput = document.getElementById('mostrarSiglaFX');
+                    const btnMostrarSiglaFx = document.getElementById('btnMostrarSiglaFx');
+                    if (mostrarSiglaFxInput && btnMostrarSiglaFx) {
+                        // ObtÃ©m valor inicial do backend (0, 1 ou 2)
+                        let siglaFxState = 1; // default PREVIEW
+                        if (typeof data.mostrarSiglaFX === 'number') {
+                            siglaFxState = data.mostrarSiglaFX;
+                        } else if (typeof data.mostrarSiglaFX === 'boolean') {
+                            siglaFxState = data.mostrarSiglaFX ? 1 : 0;
+                        }
+                        // Garante que o valor estÃ¡ entre 0-2
+                        if (siglaFxState < 0 || siglaFxState > 2) siglaFxState = 1;
+                        mostrarSiglaFxInput.value = siglaFxState;
+
+                        function syncSiglaFxUI() {
+                            const state = parseInt(mostrarSiglaFxInput.value);
+                            const span = btnMostrarSiglaFx.querySelector('span') || btnMostrarSiglaFx;
+                            
+                            // Remove todas as classes
+                            btnMostrarSiglaFx.classList.remove('rect-toggle-fx-off', 'rect-toggle-fx-on', 'rect-toggle-fx-live');
+                            
+                            if (state === 0) {
+                                // OFF - vermelho
+                                btnMostrarSiglaFx.classList.add('rect-toggle-fx-off');
+                                span.textContent = 'SIGLA FX OFF';
+                            } else if (state === 1) {
+                                // PREVIEW - azul (sempre mostra)
+                                btnMostrarSiglaFx.classList.add('rect-toggle-fx-on');
+                                span.textContent = 'SIGLA FX PREVIEW';
+                            } else { // state === 2
+                                // LIVE MODE - roxo/amarelo (hÃ­brido)
+                                btnMostrarSiglaFx.classList.add('rect-toggle-fx-live');
+                                span.textContent = 'SIGLA FX LIVE MODE';
+                            }
+                        }
+
+                        syncSiglaFxUI();
+
+                        btnMostrarSiglaFx.addEventListener('click', function () {
+                            // Cicla: 0 -> 1 -> 2 -> 0
+                            let currentState = parseInt(mostrarSiglaFxInput.value);
+                            currentState = (currentState + 1) % 3;
+                            mostrarSiglaFxInput.value = currentState;
+                            syncSiglaFxUI();
+                        });
+
+                        // Debug opcional: mostra no console o estado carregado
+                        console.log('[SIGLA FX] loaded from backend:', data.mostrarSiglaFX, '-> using:', siglaFxState);
+                    }
+
+                    // FX DISPLAY (novo): 2 botões
+                    // - MODO: SIGLAS / ICONES / OFF  (0=OFF, 1=SIGLAS, 2=ICONES)
+                    // - QUANDO: SEMPRE VISIVEL / LIVE MODE / NUNCA (0=SEMPRE, 1=LIVE MODE, 2=NUNCA)
+                    (function initFxDisplayButtons() {
+                        const fxModoInput = document.getElementById('mostrarFxModo');
+                        const fxQuandoInput = document.getElementById('mostrarFxQuando');
+                        const btnFxModo = document.getElementById('btnMostrarFxModo');
+                        const btnFxQuando = document.getElementById('btnMostrarFxQuando');
+                        const btnFxQuandoLabel = document.getElementById('btnMostrarFxQuandoLabel');
+                        // Make btnFxModo optional
+                        if (!fxModoInput || !fxQuandoInput || !btnFxQuando) return;
+
+                        let fxModo = (typeof data.mostrarFxModo === 'number') ? data.mostrarFxModo : 1;
+                        let fxQuando = (typeof data.mostrarFxQuando === 'number') ? data.mostrarFxQuando : 0;
+
+                        // Fallback: legado mostrarSiglaFX (0=NUNCA, 1=SEMPRE, 2=LIVE MODE)
+                        if (data.mostrarFxModo === undefined || data.mostrarFxQuando === undefined) {
+                            let legacy = null;
+                            if (typeof data.mostrarSiglaFX === 'number') legacy = data.mostrarSiglaFX;
+                            else if (typeof data.mostrarSiglaFX === 'boolean') legacy = data.mostrarSiglaFX ? 1 : 0;
+
+                            if (legacy !== null) {
+                                // Converte: 0=NUNCA->quando=2, 1=SEMPRE->quando=0, 2=LIVE->quando=1
+                                fxModo = 1; // SIGLAS (sempre ativo)
+                                if (legacy === 0) {
+                                    fxQuando = 2; // NUNCA
+                                } else if (legacy === 2) {
+                                    fxQuando = 1; // LIVE MODE
+                                } else {
+                                    fxQuando = 0; // SEMPRE
+                                }
+                            }
+                        }
+
+                        if (fxModo < 0 || fxModo > 2) fxModo = 1;
+                        if (fxQuando < 0 || fxQuando > 2) fxQuando = 0;
+
+                        fxModoInput.value = fxModo;
+                        fxQuandoInput.value = fxQuando;
+
+                        function syncFxUI() {
+                            const modo = parseInt(fxModoInput.value);
+                            const quando = parseInt(fxQuandoInput.value);
+
+                            if (btnFxModo) {
+                                const spanModo = btnFxModo.querySelector('span') || btnFxModo;
+                                btnFxModo.classList.remove('rect-toggle-fx-off', 'rect-toggle-fx-on', 'rect-toggle-fx-live');
+                                if (modo === 0) {
+                                    btnFxModo.classList.add('rect-toggle-fx-off');
+                                    spanModo.textContent = 'OFF';
+                                } else if (modo === 1) {
+                                    btnFxModo.classList.add('rect-toggle-fx-on');
+                                    spanModo.textContent = 'SIGLAS';
+                                } else {
+                                    btnFxModo.classList.add('rect-toggle-fx-live');
+                                    spanModo.textContent = 'ICONES';
+                                }
+                            }
+
+                            btnFxQuando.classList.remove('rect-toggle-fx-on', 'rect-toggle-fx-live', 'rect-toggle-fx-off');
+                            if (btnFxQuandoLabel) {
+                                if (quando === 0) {
+                                    btnFxQuando.classList.add('rect-toggle-fx-on');
+                                    btnFxQuandoLabel.textContent = 'SEMPRE VISIVEL';
+                                } else if (quando === 1) {
+                                    btnFxQuando.classList.add('rect-toggle-fx-live');
+                                    btnFxQuandoLabel.textContent = 'LIVE MODE';
+                                } else {
+                                    // quando === 2 -> NUNCA
+                                    btnFxQuando.classList.add('rect-toggle-fx-off');
+                                    btnFxQuandoLabel.textContent = 'NUNCA';
+                                }
+                            }
+
+                            // Only disable if btnFxModo exists AND mode is 0. If btnFxModo is gone, assume we want control.
+                            const disabled = btnFxModo ? (modo === 0) : false;
+                            btnFxQuando.disabled = disabled;
+                            btnFxQuando.style.opacity = disabled ? '0.55' : '1';
+                        }
+
+                        syncFxUI();
+
+                        if (btnFxModo) {
+                            btnFxModo.addEventListener('click', function () {
+                                // SIGLAS -> ICONES -> OFF -> SIGLAS
+                                let current = parseInt(fxModoInput.value);
+                                if (current === 1) current = 2;
+                                else if (current === 2) current = 0;
+                                else current = 1;
+                                fxModoInput.value = current;
+                                syncFxUI();
+                            });
+                        }
+
+                        btnFxQuando.addEventListener('click', function () {
+                            if (btnFxQuando.disabled) return;
+                            let current = parseInt(fxQuandoInput.value);
+                            // Ciclo: SEMPRE (0) -> LIVE MODE (1) -> NUNCA (2) -> SEMPRE (0)
+                            current = (current + 1) % 3;
+                            fxQuandoInput.value = current;
+                            syncFxUI();
+                        });
+                    })();
+
+                    // Estado inicial BACKGROUND MODE (BACK PADRAO / BACK COLOR)
+                    const bgToggle = document.getElementById('bgColorEnabled');
+                    const btnBg = document.getElementById('btnBackgroundMode');
+                    const btnBgLabel = document.getElementById('btnBackgroundModeLabel');
+                    const bgPickerGroup = document.getElementById('backgroundColorPickerGroup');
+
+                    if (bgToggle && btnBg && btnBgLabel && bgPickerGroup) {
+                        bgToggle.checked = !!data.backgroundEnabled;
+                        function syncBgUI() {
+                            if (bgToggle.checked) {
+                                // BACK COLOR (ON)
+                                btnBg.classList.remove('rect-toggle-bg-off');
+                                btnBg.classList.add('rect-toggle-bg-on');
+                                btnBgLabel.textContent = 'BACK COLOR';
+                                bgPickerGroup.style.display = 'block';
+                            } else {
+                                // BACK PADRAO (OFF)
+                                btnBg.classList.remove('rect-toggle-bg-on');
+                                btnBg.classList.add('rect-toggle-bg-off');
+                                btnBgLabel.textContent = 'BACK PADRAO';
+                                bgPickerGroup.style.display = 'none';
+                            }
+                        }
+                        syncBgUI();
+                        btnBg.addEventListener('click', function () {
+                            bgToggle.checked = !bgToggle.checked;
+                            syncBgUI();
+                        });
+                    }
+                    
+                    // Carrega cores dos presets (A-E + F para LED NUMEROS = 6 cores)
+                    ['A', 'B', 'C', 'D', 'E', 'F'].forEach((presetLetter, index) => {
+                        createCustomColorSelector(
+                            'preset' + presetLetter + 'SelectedColorPreview',
+                            'preset' + presetLetter + 'ColorOptionsPanel',
+                            PRESET_COLORS,
+                            (colorUint32) => { selectedPresetColorsUint32[index] = colorUint32; },
+                            data.coresPresetConfig ? data.coresPresetConfig[index] : 0,
+                            false // isIndexBased = false
+                        );
+                    });
+
+                    // Carrega cores do Live Mode
+                    createCustomColorSelector(
+                        'liveModeSelectedColorPreview',
+                        'liveModeColorOptionsPanel',
+                        PRESET_COLORS,
+                        (colorUint32) => { selectedLiveModeColorUint32 = colorUint32; },
+                        data.corLiveModeConfig,
+                        false // isIndexBased = false
+                    );
+                    createCustomColorSelector(
+                        'liveMode2SelectedColorPreview',
+                        'liveMode2ColorOptionsPanel',
+                        PRESET_COLORS,
+                        (colorUint32) => { selectedLiveMode2ColorUint32 = colorUint32; },
+                        data.corLiveMode2Config,
+                        false // isIndexBased = false
+                    );
+
+                    // Estado inicial: LIVE Layer2 ON/OFF
+                    const liveLayer2Checkbox = document.getElementById('liveLayer2Enabled');
+                    const liveLayer2Button = document.getElementById('liveLayer2ToggleButton');
+                    const liveLayer2Label = document.getElementById('liveLayer2ToggleLabel');
+                    if (liveLayer2Checkbox && liveLayer2Button && liveLayer2Label) {
+                        liveLayer2Checkbox.checked = (typeof data.liveLayer2Enabled === 'boolean') ? !!data.liveLayer2Enabled : false;
+                        const syncLiveLayer2Button = () => {
+                            const enabled = liveLayer2Checkbox.checked;
+                            liveLayer2Label.textContent = enabled ? 'Layer 2 ON' : 'Layer 2 OFF';
+                            liveLayer2Button.classList.toggle('off', !enabled);
+                        };
+                        syncLiveLayer2Button();
+                        liveLayer2Button.addEventListener('click', () => {
+                            liveLayer2Checkbox.checked = !liveLayer2Checkbox.checked;
+                            syncLiveLayer2Button();
+                        });
+                    }
+
+                    // Carrega cor do Background
+                    createCustomColorSelector(
+                        'backgroundSelectedColorPreview',
+                        'backgroundColorOptionsPanel',
+                        BACKGROUND_COLORS,
+                        (colorUint32) => { selectedBackgroundColorUint32 = colorUint32; },
+                        data.backgroundColorConfig || 0x000000,
+                        false // isIndexBased = false
+                    );
+                    
+                    swGlobalConfig = normalizeSwGlobalConfig(data.swGlobal || {}); // Carrega o objeto swGlobal
+
+                    // Esconde card SW GLOBAL para placas que nao tem TAP_FULL (7S e 4S)
+                    const boardName = data.boardName || '';
+                    const boards7S = ['BFMIDI-1 7S_A1', 'BFMIDI-1 7S_B1', 'BFMIDI-1 7S_C1', 'BFMIDI-2 7S', 'BFMIDI-1 4S'];
+                    const swGlobalSection = document.querySelector('.section-swglobal');
+                    if (swGlobalSection) {
+                        if (boards7S.includes(boardName)) {
+                            swGlobalSection.style.display = 'block';
+                            loadSwGlobalDataToUI();
+                        } else {
+                            swGlobalSection.style.display = 'none';
+                        }
+                    }
+
+                    // Carrega estados LOCK
+                    lockSetup = !!data.lockSetup;
+                    lockGlobal = !!data.lockGlobal;
+                    updateLockButtonsUI();
+                    attachLockButtonsHandlers();
+
+                    // Carrega LED Mode (LETRAS / NUMEROS)
+                    ledModeNumeros = !!data.ledModeNumeros;
+                    updateLedModeToggleUI();
+                    attachLedModeToggleHandler();
+
+                    const selectModeSelect = document.getElementById('selectModeIndex');
+                    if (selectModeSelect) {
+                        selectModeSelect.value = data.selectModeIndex;
+                        updateCustomSelectVisual(selectModeSelect);
+                    }
+
+                    // Carrega niveis de preset
+                    if (data.presetLevels) {
+                        presetLevels = data.presetLevels;
+                        updatePresetLevelButtons();
+                    }
+
+                    // Carrega configuracao de INICIO AUTOMATICO
+                    initAutoStartUI(data);
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar configuracoes globais:', error);
+                    statusMessage.textContent = 'Erro ao carregar configuracoes.';
+                    statusMessage.style.color = 'red';
+                });
+        });
+
+        // Funcao para mostrar/ocultar botao SHOW FX baseado no modo MIDI
+        // Visivel apenas para: AMPERO AS2, A. STAGE 2, AMPERO MP350, HX STOMP
+        function updateShowFxButtonVisibility(modoMidi) {
+            const btnMostrarCadeia = document.getElementById('btnMostrarCadeia');
+            if (!btnMostrarCadeia) return;
+
+            const modosComShowFx = ['AMPERO AS2', 'A. STAGE 2', 'AMPERO MP350', 'HX STOMP'];
+            if (modosComShowFx.includes(modoMidi)) {
+                btnMostrarCadeia.style.display = '';
+            } else {
+                btnMostrarCadeia.style.display = 'none';
+            }
+        }
+
+        function syncLedPreviewButton() {
+            const ledPreviewCheckbox = document.getElementById('ledPreview');
+            const ledPreviewButton = document.getElementById('ledPreviewButton');
+            if (!ledPreviewCheckbox || !ledPreviewButton) return;
+
+            const span = ledPreviewButton.querySelector('span') || ledPreviewButton;
+
+            if (ledPreviewCheckbox.checked) {
+                // ON - azul
+                ledPreviewButton.classList.remove('rect-toggle-fx-off');
+                ledPreviewButton.classList.add('rect-toggle-fx-on');
+                span.textContent = 'LED PREVIEW ON';
+            } else {
+                // OFF - vermelho
+                ledPreviewButton.classList.remove('rect-toggle-fx-on');
+                ledPreviewButton.classList.add('rect-toggle-fx-off');
+                span.textContent = 'LED PREVIEW OFF';
+            }
+        }
+
+        (function initLedPreviewButton() {
+            const ledPreviewCheckbox = document.getElementById('ledPreview');
+            const ledPreviewButton = document.getElementById('ledPreviewButton');
+            if (!ledPreviewCheckbox || !ledPreviewButton) return;
+
+            syncLedPreviewButton();
+
+            ledPreviewButton.addEventListener('click', function () {
+                ledPreviewCheckbox.checked = !ledPreviewCheckbox.checked;
+                syncLedPreviewButton();
+            });
+        })();
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            statusMessage.textContent = 'Salvando...';
+            statusMessage.style.color = 'orange';
+
+            const formData = new FormData(form);
+            updateSwGlobalDataFromUI(); // Garante que os dados da UI estao no objeto JS
+            const dataToSave = {
+                ledBrilho: parseInt(ledBrilho),
+                ledPreview: document.getElementById('ledPreview').checked,
+                modoMidiIndex: modoMidiOptionsValues.indexOf(formData.get('modoMidi')),
+                // SHOW FX SCREEN legado (usado pelo firmware para tela/cadeia FX)
+                mostrarTelaFX: document.getElementById('mostrarTelaFX').checked,
+                // CADEIA segue o mesmo estado (para uso futuro se necessÃ¡rio)
+                mostrarCadeia: document.getElementById('mostrarCadeia').checked,
+                // SIGLA FX controla apenas exibiÃ§Ã£o das siglas FX na MAIN SCREEN (0=OFF, 1=PREVIEW, 2=LIVE MODE)
+                mostrarFxModo: parseInt(document.getElementById('mostrarFxModo').value),
+                mostrarFxQuando: parseInt(document.getElementById('mostrarFxQuando').value),
+
+                coresPresetConfig: selectedPresetColorsUint32,
+                corLiveModeConfig: selectedLiveModeColorUint32,
+                corLiveMode2Config: selectedLiveMode2ColorUint32,
+                liveLayer2Enabled: document.getElementById('liveLayer2Enabled') ? document.getElementById('liveLayer2Enabled').checked : true,
+                backgroundEnabled: document.getElementById('bgColorEnabled') ? document.getElementById('bgColorEnabled').checked : false,
+                backgroundColorConfig: selectedBackgroundColorUint32,
+                selectModeIndex: parseInt(formData.get('selectModeIndex')),
+                swGlobal: swGlobalConfig, // Adiciona o objeto completo do SW Global
+                presetLevels: presetLevels,
+                // Novos campos LOCK
+                lockSetup: lockSetup,
+                lockGlobal: lockGlobal,
+                // LED Mode (LETRAS / NUMEROS)
+                ledModeNumeros: ledModeNumeros,
+                // INICIO AUTOMATICO
+                autoStartEnabled: document.getElementById('autoStartEnabled') ? document.getElementById('autoStartEnabled').checked : false,
+                autoStartRow: parseInt(document.getElementById('autoStartRow')?.value || 0),
+                autoStartCol: parseInt(document.getElementById('autoStartCol')?.value || 0),
+                autoStartLiveMode: document.getElementById('autoStartLiveMode') ? document.getElementById('autoStartLiveMode').checked : false
+            };
+
+            fetch('/api/global-config/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dataToSave)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    statusMessage.textContent = 'Configuracoes salvas com sucesso!';
+                    statusMessage.style.color = 'green';
+                    // show floating banner for 500ms
+                    setTimeout(() => {
+                        showSavedBanner();
+                    }, 100);
+                } else {
+                    statusMessage.textContent = 'Erro ao salvar: ' + (result.message || 'Erro desconhecido.');
+                    statusMessage.style.color = 'red';
+                }
+                setTimeout(() => { statusMessage.textContent = ''; }, 5000);
+            })
+            .catch(error => {
+                console.error('Erro ao salvar configuracoes:', error);
+                statusMessage.textContent = 'Erro de comunicacao ao salvar.';
+                statusMessage.style.color = 'red';
+                setTimeout(() => { statusMessage.textContent = ''; }, 5000);
+            });
+        });
+
+        if (ledBrilhoButton) {
+            ledBrilhoButton.addEventListener('click', () => {
+                // ciclo 1..5 => 20..100
+                ledBrilho = ledBrilho + 1;
+                if (ledBrilho > 5) ledBrilho = 1;
+                const pct = ledBrilho * 20;
+                ledBrilhoButton.textContent = 'BRILHO LED ' + pct + '%';
+            });
+        }
+
+        
+
+        const presetLevelsContainer = document.getElementById('presetLevelsContainer');
+        const presetLevelMap = ['A', 'B', 'C', 'D', 'E'];
+        if (presetLevelsContainer) {
+            presetLevelsContainer.addEventListener('click', (event) => {
+                const target = event.target.closest('.preset-level-box');
+                if (!target) return;
+                const levelChar = target.dataset.level;
+                const levelIndex = presetLevelMap.indexOf(levelChar);
+                if (levelIndex === -1) return; // Should not happen
+
+                const currentlySelectedCount = presetLevels.filter(Boolean).length;
+
+                if (presetLevels[levelIndex] && currentlySelectedCount <= 1) {
+                    return; 
+                }
+
+                presetLevels[levelIndex] = !presetLevels[levelIndex];
+
+                target.classList.toggle('selected', presetLevels[levelIndex]);
+                // eslint-disable-next-line no-unused-expressions
+                target.offsetHeight;
+
+                updatePresetLevelButtons();
+            });
+        }
+
+        function updatePresetLevelButtons() {
+            const boxes = presetLevelsContainer ? presetLevelsContainer.querySelectorAll('.preset-level-box') : [];
+            boxes.forEach((box, index) => {
+                const shouldBeSelected = !!presetLevels[index];
+                box.classList.toggle('selected', shouldBeSelected);
+                // eslint-disable-next-line no-unused-expressions
+                box.offsetHeight;
+            });
+        }
+
+
+        function updateLockButtonsUI() {
+            const setupBtn = document.getElementById('lockSetupBtn');
+            const globalBtn = document.getElementById('lockGlobalBtn');
+
+            if (setupBtn) {
+                // selected = ATIVO (vermelho) conforme CSS atualizado
+                setupBtn.classList.toggle('selected', !!lockSetup);
+                setupBtn.offsetHeight;
+            }
+            if (globalBtn) {
+                globalBtn.classList.toggle('selected', !!lockGlobal);
+                globalBtn.offsetHeight;
+            }
+        }
+
+        function attachLockButtonsHandlers() {
+            const container = document.getElementById('lockButtonsContainer');
+            if (!container) return;
+            container.addEventListener('click', (event) => {
+                const target = event.target.closest('.lock-button');
+                if (!target) return;
+                const type = target.dataset.lock; // 'setup' ou 'global'
+                if (type === 'setup') {
+                    lockSetup = !lockSetup;
+                } else if (type === 'global') {
+                    lockGlobal = !lockGlobal;
+                }
+                updateLockButtonsUI();
+            });
+        }
+
+        // LED Mode Toggle (LETRAS / NUMEROS)
+        function updateLedModeToggleUI() {
+            const btn = document.getElementById('ledModeToggleButton');
+            const label = document.getElementById('ledModeToggleLabel');
+            const checkbox = document.getElementById('ledModeNumeros');
+            const presetFColorItem = document.getElementById('presetFColorItem');
+            if (btn && label) {
+                if (ledModeNumeros) {
+                    label.textContent = 'LED NUMEROS';
+                    btn.classList.remove('rect-toggle-fx-on');
+                    btn.classList.add('rect-toggle-fx-live');
+                } else {
+                    label.textContent = 'LED LETRAS';
+                    btn.classList.remove('rect-toggle-fx-live');
+                    btn.classList.add('rect-toggle-fx-on');
+                }
+            }
+            if (checkbox) {
+                checkbox.checked = ledModeNumeros;
+            }
+            // Show/hide 6th color picker based on mode
+            if (presetFColorItem) {
+                presetFColorItem.style.display = ledModeNumeros ? 'block' : 'none';
+            }
+            // Update all preset color labels based on mode
+            const letterLabels = ['PRESET A:', 'PRESET B:', 'PRESET C:', 'PRESET D:', 'PRESET E:', 'SW 6:'];
+            const numberLabels = ['SW 1:', 'SW 2:', 'SW 3:', 'SW 4:', 'SW 5:', 'SW 6:'];
+            const labelIds = ['presetALabel', 'presetBLabel', 'presetCLabel', 'presetDLabel', 'presetELabel', 'presetFLabel'];
+            const labels = ledModeNumeros ? numberLabels : letterLabels;
+            labelIds.forEach((id, i) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = labels[i];
+            });
+        }
+
+        function attachLedModeToggleHandler() {
+            const btn = document.getElementById('ledModeToggleButton');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                ledModeNumeros = !ledModeNumeros;
+                updateLedModeToggleUI();
+            });
+        }
+
+        // INICIO AUTOMATICO - Inicializa UI e handlers
+        function initAutoStartUI(data) {
+            const toggleBtn = document.getElementById('autoStartToggleBtn');
+            const toggleLabel = document.getElementById('autoStartToggleLabel');
+            const checkbox = document.getElementById('autoStartEnabled');
+            const rowInput = document.getElementById('autoStartRow');
+            const colInput = document.getElementById('autoStartCol');
+            const rowBtn = document.getElementById('autoStartRowBtn');
+            const rowLabel = document.getElementById('autoStartRowLabel');
+            const colBtn = document.getElementById('autoStartColBtn');
+            const colLabel = document.getElementById('autoStartColLabel');
+
+            if (!toggleBtn || !checkbox || !rowInput || !colInput) return;
+
+            const rowLetters = ['A', 'B', 'C', 'D', 'E'];
+            const colNumbers = ['1', '2', '3', '4', '5', '6'];
+
+            // Carrega valores do backend
+            checkbox.checked = !!data.autoStartEnabled;
+            rowInput.value = data.autoStartRow || 0;
+            colInput.value = data.autoStartCol || 0;
+
+            // Sync visual do toggle ON/OFF
+            function syncAutoStartToggle() {
+                if (checkbox.checked) {
+                    toggleBtn.classList.remove('rect-toggle-fx-off');
+                    toggleBtn.classList.add('rect-toggle-fx-on');
+                    toggleLabel.textContent = 'ON';
+                } else {
+                    toggleBtn.classList.remove('rect-toggle-fx-on');
+                    toggleBtn.classList.add('rect-toggle-fx-off');
+                    toggleLabel.textContent = 'OFF';
+                }
+            }
+            syncAutoStartToggle();
+
+            // Sync visual dos botoes de letra e numero
+            function syncRowLabel() {
+                if (rowLabel) {
+                    const idx = parseInt(rowInput.value) || 0;
+                    rowLabel.textContent = rowLetters[idx] || 'A';
+                }
+            }
+            function syncColLabel() {
+                if (colLabel) {
+                    const idx = parseInt(colInput.value) || 0;
+                    colLabel.textContent = colNumbers[idx] || '1';
+                }
+            }
+            syncRowLabel();
+            syncColLabel();
+
+            // Toggle ON/OFF click
+            toggleBtn.addEventListener('click', () => {
+                checkbox.checked = !checkbox.checked;
+                syncAutoStartToggle();
+            });
+
+            // Click handler para botao de letra - cicla A->B->C->D->E->F->A
+            if (rowBtn) {
+                rowBtn.addEventListener('click', () => {
+                    let currentRow = parseInt(rowInput.value) || 0;
+                    currentRow = (currentRow + 1) % 6;
+                    rowInput.value = currentRow;
+                    syncRowLabel();
+                });
+            }
+
+            // Click handler para botao de numero - cicla 1->2->3->4->5->6->1
+            if (colBtn) {
+                colBtn.addEventListener('click', () => {
+                    let currentCol = parseInt(colInput.value) || 0;
+                    currentCol = (currentCol + 1) % 6;
+                    colInput.value = currentCol;
+                    syncColLabel();
+                });
+            }
+
+            // Botao PRESET MODE / LIVE MODE
+            const liveModeBtn = document.getElementById('autoStartLiveModeBtn');
+            const liveModeLabel = document.getElementById('autoStartLiveModeLabel');
+            const liveModeCheckbox = document.getElementById('autoStartLiveMode');
+
+            if (liveModeBtn && liveModeCheckbox) {
+                liveModeCheckbox.checked = !!data.autoStartLiveMode;
+
+                function syncLiveModeBtn() {
+                    if (liveModeCheckbox.checked) {
+                        liveModeBtn.classList.remove('rect-toggle-fx-off');
+                        liveModeBtn.classList.add('rect-toggle-fx-on');
+                        liveModeLabel.textContent = 'LIVE MODE';
+                    } else {
+                        liveModeBtn.classList.remove('rect-toggle-fx-on');
+                        liveModeBtn.classList.add('rect-toggle-fx-off');
+                        liveModeLabel.textContent = 'PRESET MODE';
+                    }
+                }
+                syncLiveModeBtn();
+
+                liveModeBtn.addEventListener('click', () => {
+                    liveModeCheckbox.checked = !liveModeCheckbox.checked;
+                    syncLiveModeBtn();
+                });
+            }
+        }
+
+        function initializeSwGlobalFields() {
+            populateSelect('switchMode', MODE_OPTIONS_WEB);
+            populateNumericSelect('switchCC', 0, 127, 48);
+            populateNumericSelect('switchChannel', 0, 16, 1);
+            
+            createCustomColorSelector(
+                'selectedLedColorPreview',
+                'swGlobalLedColorPanel',
+                PRESET_COLORS,
+                (colorIndex) => { 
+                    selectedSwGlobalLedIndex = colorIndex;
+                },
+                0, // Cor inicial padrao (indice 0, Vermelho)
+                true // isIndexBased = true
+            );
+
+            // Adiciona listeners
+            document.getElementById('switchMode').addEventListener('change', function() {
+                updateSwGlobalSpecificUI(this.value);
+            });
+            
+            // Inicializa todos os selects como customizados
+            ['modoMidi', 'selectModeIndex', 'switchMode', 'switchCC', 'switchChannel'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    // The wrapper div is now the parent of the select, so we pass the select itself.
+                    initializeCustomSelect(el);
+                }
+            });
+        }
+
+        function loadSwGlobalDataToUI() {
+            if (!swGlobalConfig) return;
+            
+            // Quando armazenado como RAMPA2/3/52, apresentamos como 'RAMPA' no seletor (valor 4)
+            let uiModo = swGlobalConfig.modo || 0;
+            if (uiModo === 5 || uiModo === 6 || uiModo === 52) uiModo = 4;
+            document.getElementById('switchMode').value = uiModo;
+            document.getElementById('switchCC').value = swGlobalConfig.cc || 48;
+            document.getElementById('switchStart').checked = swGlobalConfig.start_value || false;
+            document.getElementById('switchChannel').value = (swGlobalConfig.canal ?? 1);
+            
+            selectedSwGlobalLedIndex = swGlobalConfig.led || 0;
+            selectedSwGlobalLed2Index = swGlobalConfig.led2 || 0;
+            const initialColor = PRESET_COLORS[selectedSwGlobalLedIndex] || PRESET_COLORS[0];
+            const previewBox = document.getElementById('selectedLedColorPreviewBox');
+            if (previewBox) {
+                previewBox.style.backgroundImage = `linear-gradient(to right, black 2%, ${initialColor.hex} 50%, black 98%)`;
+            }
+
+            updateCustomSelectVisual(document.getElementById('switchMode'));
+            updateCustomSelectVisual(document.getElementById('switchCC'));
+            updateCustomSelectVisual(document.getElementById('switchChannel'));
+
+            updateSwGlobalSpecificUI(String(swGlobalConfig.modo));
+            setTimeout(() => { syncSpinSendPcGlobal(!!swGlobalConfig.spin_send_pc, true); }, 0);
+        }
+
+        function updateSwGlobalDataFromUI() {
+            if (!swGlobalConfig) swGlobalConfig = {};
+            let modo = parseInt(document.getElementById('switchMode').value, 10);
+
+            if (modo === 17) { // FAVORITE
+                const favoriteSelect = document.getElementById('swFavoritePresetSelect_global');
+                if (favoriteSelect) {
+                    swGlobalConfig.cc = parseInt(favoriteSelect.value, 10);
+                }
+                const favToggle = document.getElementById('favoriteLiveToggle_global');
+                if (favToggle) {
+                    swGlobalConfig.favoriteAutoLive = !!favToggle.checked;
+                }
+            } else {
+                swGlobalConfig.cc = parseInt(document.getElementById('switchCC').value, 10);
+                // Clear favorite-only fields when not in FAVORITE
+                swGlobalConfig.favoriteAutoLive = !!swGlobalConfig.favoriteAutoLive && false;
+            }
+
+            // RAMPA (UI consolidado): captura sliders e toggles de rampa
+            if (modo === 4 || modo === 5 || modo === 6 || modo === 52) {
+                const upEl = document.getElementById('rampUp_global');
+                const dnEl = document.getElementById('rampDown_global');
+                const invEl = document.getElementById('rampInvert_global');
+                const autoEl = document.getElementById('rampAuto_global');
+                if (upEl) swGlobalConfig.rampUp = parseInt(upEl.value, 10) || 0;
+                if (dnEl) swGlobalConfig.rampDown = parseInt(dnEl.value, 10) || 0;
+                if (invEl) swGlobalConfig.rampInvert = !!invEl.checked;
+                if (autoEl) swGlobalConfig.rampAutoStop = !!autoEl.checked;
+                // Normaliza modo para RAMPA unificado (4) na UI
+                modo = 4;
+            }
+
+            // Armazena o modo final (apÃ³s tratar variantes de RAMPA)
+            swGlobalConfig.modo = modo;
+            
+            swGlobalConfig.start_value = document.getElementById('switchStart').checked;
+            const spinSendInput = document.getElementById('spinSendPcToggle_global');
+            if (spinSendInput) {
+                swGlobalConfig.spin_send_pc = !!spinSendInput.checked;
+            } else if (swGlobalConfig.spin_send_pc === undefined) {
+                swGlobalConfig.spin_send_pc = false;
+            }
+            {
+                const chVal = parseInt(document.getElementById('switchChannel').value, 10);
+                swGlobalConfig.canal = (!isNaN(chVal) && chVal >= 0 && chVal <= 16) ? chVal : 1;
+            }
+            swGlobalConfig.led = selectedSwGlobalLedIndex;
+            // TAP TEMPO extras: capturar valores de TAP2/TAP3
+            if (swGlobalConfig.modo === 18) {
+                const t2cc = parseInt(document.getElementById("tap2_cc_global")?.value, 10);
+                const t2ch = parseInt(document.getElementById("tap2_ch_global")?.value, 10);
+                const t3cc = parseInt(document.getElementById("tap3_cc_global")?.value, 10);
+                const t3ch = parseInt(document.getElementById("tap3_ch_global")?.value, 10);
+                swGlobalConfig.tap2_cc = isNaN(t2cc) ? 0 : t2cc;
+                swGlobalConfig.tap2_ch = isNaN(t2ch) ? 0 : t2ch;
+                swGlobalConfig.tap3_cc = isNaN(t3cc) ? 0 : t3cc;
+                swGlobalConfig.tap3_ch = isNaN(t3ch) ? 0 : t3ch;
+
+                const cc2El = document.getElementById("switchCC2_global");
+                if (cc2El) swGlobalConfig.cc2 = parseInt(cc2El.value, 10) || 0;
+                const cc2ChEl = document.getElementById("switchChannelCC2_global");
+                if (cc2ChEl) {
+                    const chVal = parseInt(cc2ChEl.value, 10);
+                    swGlobalConfig.canal_cc2 = (!isNaN(chVal) && chVal >= 0 && chVal <= 16) ? chVal : 1;
+                    swGlobalConfig.cc2_ch = swGlobalConfig.canal_cc2;
+                }
+                const cc2StartEl = document.getElementById("switchCC2Start_global");
+                swGlobalConfig.start_value_cc2 = !!(cc2StartEl && cc2StartEl.checked);
+                swGlobalConfig.led2 = selectedSwGlobalLed2Index;
+            }
+
+            // Atualiza dados dos extras, se houver
+            const modeValue = swGlobalConfig.modo;
+            if (!swGlobalConfig.extras) swGlobalConfig.extras = {}; // Garante que extras exista
+
+            if ((modeValue >= 1 && modeValue <= 3) || (modeValue >= 38 && modeValue <= 40)) { // SPIN
+                const spinIndex = (modeValue >= 38) ? (modeValue - 38 + 3) : (modeValue - 1);
+                if (!swGlobalConfig.extras.spin) swGlobalConfig.extras.spin = [{}, {}, {}];
+                swGlobalConfig.extras.spin[spinIndex] = {
+                    v1: parseInt(document.getElementById(`spinV1_${spinIndex}`)?.value, 10) || 0,
+                    v2: parseInt(document.getElementById(`spinV2_${spinIndex}`)?.value, 10) || 0,
+                    v3: parseInt(document.getElementById(`spinV3_${spinIndex}`)?.value, 10) || 0,
+                };
+            } else if (modeValue >= 7 && modeValue <= 9) { // CONTROL
+                const controlIndex = modeValue - 7;
+                if (!swGlobalConfig.extras.control) swGlobalConfig.extras.control = [{}, {}, {}];
+                swGlobalConfig.extras.control[controlIndex] = {
+                    cc: parseInt(document.getElementById(`controlCC_${controlIndex}`)?.value, 10) || 0,
+                    modo_invertido: document.getElementById(`controlInvertToggle_${controlIndex}`)?.checked || false,
+                };
+            } else if ((modeValue >= 10 && modeValue <= 15) || (modeValue >= 22 && modeValue <= 27)) { // CUSTOM
+                const customIndex = (modeValue >= 10 && modeValue <= 15) ? modeValue - 10 : modeValue - 22;
+                if (!swGlobalConfig.extras.custom) swGlobalConfig.extras.custom = [{},{},{},{},{},{}];
+                swGlobalConfig.extras.custom[customIndex] = {
+                    valor_off: parseInt(document.getElementById(`customOff_${customIndex}`)?.value, 10) || 0,
+                    valor_on: parseInt(document.getElementById(`customOn_${customIndex}`)?.value, 10) || 127,
+                };
+            }
+        }
+
+        function updateSwGlobalSpecificUI(modeValueStr) {
+            const modeValue = parseInt(modeValueStr);
+            const dynamicArea = document.getElementById('dynamicModeConfigArea');
+            dynamicArea.innerHTML = '';
+            dynamicArea.style.display = 'none';
+            let needsInit = false;
+
+            const ccField = document.getElementById('ccFieldFormGroup');
+            if (ccField) ccField.style.display = 'block'; // Mostra por padrao
+            // Restaura visibilidade padrao de Start e Canal
+            try { const startEl = document.getElementById('switchStart'); startEl?.closest('.form-group')?.style && (startEl.closest('.form-group').style.display = 'block'); } catch (e) {}
+            try { const chEl = document.getElementById('switchChannel'); chEl?.closest('.form-group')?.style && (chEl.closest('.form-group').style.display = 'block'); } catch (e) {}
+            
+            document.getElementById('swFavoritePresetContainer_global')?.remove();
+            // Remove UI anterior de rampa (se existir)
+            document.getElementById('rampGroup_global')?.remove();
+
+            if (modeValue === 17) { // FAVORITE
+                if(ccField) ccField.style.display = 'none';
+
+                // Hide Start and Channel groups to match PRESET FAVORITE behavior
+                try {
+                    const startEl = document.getElementById('switchStart');
+                    startEl?.closest('.form-group')?.style && (startEl.closest('.form-group').style.display = 'none');
+                } catch (e) { /* ignore */ }
+                try {
+                    const chEl = document.getElementById('switchChannel');
+                    chEl?.closest('.form-group')?.style && (chEl.closest('.form-group').style.display = 'none');
+                } catch (e) { /* ignore */ }
+
+                const initialFavPresetIdx = swGlobalConfig.cc || 0; // Favorite preset index is stored in the 'cc' field
+                const favoriteSelectElement = createFavoritePresetSelect('global', initialFavPresetIdx);
+                // Create LIVE mode toggle for FAVORITE (independent from preset one)
+                const favLiveGroup = document.createElement('div');
+                favLiveGroup.className = 'form-group';
+                favLiveGroup.appendChild(newLabel('MODO LIVE:'));
+                newToggleSwitch('favoriteLiveToggle_global', !!swGlobalConfig.favoriteAutoLive, favLiveGroup);
+
+                const switchModeFormGroup = document.getElementById('switchMode').closest('.form-group');
+                if (switchModeFormGroup) {
+                    switchModeFormGroup.insertAdjacentElement('afterend', favoriteSelectElement);
+                    favoriteSelectElement.insertAdjacentElement('afterend', favLiveGroup);
+                } else {
+                    dynamicArea.appendChild(favoriteSelectElement);
+                    dynamicArea.appendChild(favLiveGroup);
+                    dynamicArea.style.display = 'block';
+                }
+                needsInit = true;
+            }
+
+            // RAMPA: UI consolidado (subida/descida + NORMAL/INVERTIDO + AUTO STOP)
+            if (modeValue === 4 || modeValue === 5 || modeValue === 6 || modeValue === 52) {
+                try { const startEl = document.getElementById('switchStart'); startEl?.closest('.form-group')?.style && (startEl.closest('.form-group').style.display = 'none'); } catch (e) {}
+
+                const upVal = (typeof swGlobalConfig.rampUp === 'number') ? swGlobalConfig.rampUp : 1000;
+                const dnVal = (typeof swGlobalConfig.rampDown === 'number') ? swGlobalConfig.rampDown : 1000;
+                const invVal = !!swGlobalConfig.rampInvert;
+                const autoVal = (swGlobalConfig.rampAutoStop === undefined) ? true : !!swGlobalConfig.rampAutoStop;
+
+                const rGroup = document.createElement('div');
+                rGroup.className = 'extras-group';
+                rGroup.id = 'rampGroup_global';
+                rGroup.innerHTML = `
+                    <h4>RAMPA</h4>
+                    <div class="ramp-grid">
+                      <div class="ramp-sliders">
+                        <div class="spin-slider-container">
+                          <label for="rampUp_global">Tempo SUBIDA (ms):</label>
+                          <input type="range" class="spin-slider" id="rampUp_global" min="0" max="3000" step="100" value="${upVal}">
+                          <span id="rampUp_global_val" class="slider-value">${upVal} ms</span>
+                        </div>
+                        <div class="spin-slider-container">
+                          <label for="rampDown_global">Tempo DESCIDA (ms):</label>
+                          <input type="range" class="spin-slider" id="rampDown_global" min="0" max="3000" step="100" value="${dnVal}">
+                          <span id="rampDown_global_val" class="slider-value">${dnVal} ms</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div class="ramp-toggle-row">
+                          <input type="checkbox" id="rampInvert_global" style="display:none;" ${invVal? 'checked':''}>
+                          <button type="button" id="rampInvertBtn_global" class="single-toggle-button" aria-pressed="${invVal? 'true':'false'}">${invVal? 'INVERTIDO':'NORMAL'}</button>
+                          <input type="checkbox" id="rampAuto_global" style="display:none;" ${autoVal? 'checked':''}>
+                          <button type="button" id="rampAutoBtn_global" class="single-toggle-button" aria-pressed="${autoVal? 'true':'false'}">AUTO STOP ${autoVal? 'ON':'OFF'}</button>
+                        </div>
+                      </div>
+                    </div>
+                `;
+                const ledGroup = document.getElementById('selectedLedColorPreview')?.closest('.form-group');
+                if (ledGroup) {
+                    ledGroup.insertAdjacentElement('afterend', rGroup);
+                } else {
+                    dynamicArea.appendChild(rGroup); dynamicArea.style.display = 'block';
+                }
+
+                const upEl = document.getElementById('rampUp_global');
+                const upValEl = document.getElementById('rampUp_global_val');
+                const dnEl = document.getElementById('rampDown_global');
+                const dnValEl = document.getElementById('rampDown_global_val');
+                const invEl = document.getElementById('rampInvert_global');
+                const invBtn = document.getElementById('rampInvertBtn_global');
+                const autoEl = document.getElementById('rampAuto_global');
+                const autoBtn = document.getElementById('rampAutoBtn_global');
+                const updateFill = (el) => { const v = Math.max(0, Math.min(3000, parseInt(el.value,10)||0)); const p = Math.round((v/3000)*100); el.style.background = `linear-gradient(to right, #7fa6e8 ${p}%, #2a2e33 ${p}%)`; };
+                if (upEl && upValEl) { updateFill(upEl); upEl.addEventListener('input', () => { upValEl.textContent = `${upEl.value} ms`; updateFill(upEl); }); }
+                if (dnEl && dnValEl) { updateFill(dnEl); dnEl.addEventListener('input', () => { dnValEl.textContent = `${dnEl.value} ms`; updateFill(dnEl); }); }
+                if (invEl && invBtn) {
+                    const syncInv = () => { if (invEl.checked) { invBtn.classList.add('active'); invBtn.setAttribute('aria-pressed','true'); invBtn.textContent = 'INVERTIDO'; } else { invBtn.classList.remove('active'); invBtn.setAttribute('aria-pressed','false'); invBtn.textContent = 'NORMAL'; } };
+                    syncInv(); invEl.addEventListener('change', syncInv);
+                    invBtn.addEventListener('click',(e)=>{ e.preventDefault(); invEl.checked = !invEl.checked; syncInv(); invEl.dispatchEvent(new Event('change',{bubbles:true})); });
+                }
+                if (autoEl && autoBtn) {
+                    const syncAuto = () => { if (autoEl.checked) { autoBtn.classList.add('active'); autoBtn.setAttribute('aria-pressed','true'); autoBtn.textContent = 'AUTO STOP ON'; } else { autoBtn.classList.remove('active'); autoBtn.setAttribute('aria-pressed','false'); autoBtn.textContent = 'AUTO STOP OFF'; } };
+                    syncAuto(); autoEl.addEventListener('change', syncAuto);
+                    autoBtn.addEventListener('click',(e)=>{ e.preventDefault(); autoEl.checked = !autoEl.checked; syncAuto(); autoEl.dispatchEvent(new Event('change',{bubbles:true})); });
+                }
+            }
+
+            if (!swGlobalConfig.extras) { // Garante que o objeto extras exista
+                swGlobalConfig.extras = { spin:[{},{},{}], control:[{},{},{}], custom:[{},{},{},{},{},{}] };
+            }
+
+            if ((modeValue >= 1 && modeValue <= 3) || (modeValue >= 38 && modeValue <= 40)) { // SPIN
+                const spinIndex = (modeValue >= 38) ? (modeValue - 38 + 3) : (modeValue - 1);
+                const data = swGlobalConfig.extras.spin?.[spinIndex] || {v1:0, v2:64, v3:127};
+                generateSingleSpinUI(dynamicArea, data, spinIndex, !!swGlobalConfig.spin_send_pc);
+                syncSpinSendPcGlobal(!!swGlobalConfig.spin_send_pc, true);
+                dynamicArea.style.display = 'block';
+                needsInit = true;
+            } else if (modeValue >= 7 && modeValue <= 9) { // CONTROL
+                const controlIndex = modeValue - 7;
+                const data = swGlobalConfig.extras.control?.[controlIndex] || {cc:48, modo_invertido:false};
+                generateSingleControlUI(dynamicArea, data, controlIndex);
+                dynamicArea.style.display = 'block';
+                needsInit = true;
+            } else if ((modeValue >= 10 && modeValue <= 15) || (modeValue >= 22 && modeValue <= 27)) { // CUSTOM
+                const customIndex = (modeValue >= 10 && modeValue <= 15) ? modeValue - 10 : modeValue - 22;
+                const showOnlyOn = (modeValue >= 22 && modeValue <= 27);
+                const data = swGlobalConfig.extras.custom?.[customIndex] || {valor_off:0, valor_on:127};
+                generateSingleCustomUI(dynamicArea, data, customIndex, showOnlyOn);
+                dynamicArea.style.display = 'block';
+                needsInit = true;
+            }
+            else if (modeValue === 18) { // TAP TEMPO
+                const group = document.createElement("div"); group.className = "form-group";
+                group.innerHTML = '<h4>Configuracoes de TAP Adicionais</h4>';
+                
+                const row2 = document.createElement("div"); row2.className = "custom-inline-group";
+                const t2cc = document.createElement("div"); t2cc.className = "custom-value-container";
+                t2cc.appendChild(newLabel("TAP2 CC:"));
+                t2cc.appendChild(newNumericInput("tap2_cc_global", 0, 127, (swGlobalConfig.tap2_cc||0)));
+                row2.appendChild(t2cc);
+                const t2ch = document.createElement("div"); t2ch.className = "custom-value-container";
+                t2ch.appendChild(newLabel("TAP2 Canal:"));
+                t2ch.appendChild(newNumericInput("tap2_ch_global", 0, 16, (swGlobalConfig.tap2_ch||0)));
+                row2.appendChild(t2ch);
+                group.appendChild(row2);
+
+                const row3 = document.createElement("div"); row3.className = "custom-inline-group";
+                const t3cc = document.createElement("div"); t3cc.className = "custom-value-container";
+                t3cc.appendChild(newLabel("TAP3 CC:"));
+                t3cc.appendChild(newNumericInput("tap3_cc_global", 0, 127, (swGlobalConfig.tap3_cc||0)));
+                row3.appendChild(t3cc);
+                const t3ch = document.createElement("div"); t3ch.className = "custom-value-container";
+                t3ch.appendChild(newLabel("TAP3 Canal:"));
+                t3ch.appendChild(newNumericInput("tap3_ch_global", 0, 16, (swGlobalConfig.tap3_ch||0)));
+                row3.appendChild(t3ch);
+                group.appendChild(row3);
+
+                dynamicArea.appendChild(group);
+
+                const cc2Group = document.createElement("div"); cc2Group.className = "form-group";
+                cc2Group.innerHTML = '<h4>CC2 (toque longo)</h4>';
+
+                const cc2Row = document.createElement("div"); cc2Row.className = "custom-inline-group";
+                const cc2cc = document.createElement("div"); cc2cc.className = "custom-value-container";
+                cc2cc.appendChild(newLabel("CC2:"));
+                cc2cc.appendChild(newNumericInput("switchCC2_global", 0, 127, (swGlobalConfig.cc2 || 0)));
+                cc2Row.appendChild(cc2cc);
+                const cc2ch = document.createElement("div"); cc2ch.className = "custom-value-container";
+                cc2ch.appendChild(newLabel("CH:"));
+                const cc2ChVal = (typeof swGlobalConfig.canal_cc2 === 'number') ? swGlobalConfig.canal_cc2
+                               : (typeof swGlobalConfig.cc2_ch === 'number') ? swGlobalConfig.cc2_ch
+                               : 1;
+                cc2ch.appendChild(newNumericInput("switchChannelCC2_global", 0, 16, cc2ChVal));
+                cc2Row.appendChild(cc2ch);
+                cc2Group.appendChild(cc2Row);
+
+                const cc2Row2 = document.createElement("div"); cc2Row2.className = "custom-inline-group";
+                const led2Cont = document.createElement("div"); led2Cont.className = "custom-value-container";
+                led2Cont.appendChild(newLabel("LED2:"));
+                const led2Picker = document.createElement("div");
+                led2Picker.className = "custom-color-selector";
+                led2Picker.style.width = "100%";
+                led2Picker.innerHTML = `
+                    <div id="swGlobalLed2SelectedColorPreview" class="selected-color-preview" tabindex="0">
+                         <div id="swGlobalLed2SelectedColorPreviewBox" class="selected-color-preview-box"></div>
+                    </div>
+                    <input type="hidden" id="swGlobalLed2ColorValue" name="swGlobalLed2ColorValue">
+                `;
+                led2Cont.appendChild(led2Picker);
+                cc2Row2.appendChild(led2Cont);
+
+                const startWrap = document.createElement("div"); startWrap.className = "custom-value-container";
+                const startInput = document.createElement("input");
+                startInput.type = "checkbox";
+                startInput.id = "switchCC2Start_global";
+                startInput.style.display = "none";
+                startInput.checked = !!swGlobalConfig.start_value_cc2;
+                startWrap.appendChild(startInput);
+                const startBtn = document.createElement("button");
+                startBtn.type = "button";
+                startBtn.id = "startToggleBtnCc2_global";
+                startBtn.className = "single-toggle-button";
+                startWrap.appendChild(startBtn);
+                cc2Row2.appendChild(startWrap);
+                cc2Group.appendChild(cc2Row2);
+
+                dynamicArea.appendChild(cc2Group);
+
+                selectedSwGlobalLed2Index = swGlobalConfig.led2 || 0;
+                createCustomColorSelector(
+                    "swGlobalLed2SelectedColorPreview",
+                    "swGlobalLed2ColorPanel",
+                    PRESET_COLORS,
+                    (colorIndex) => { selectedSwGlobalLed2Index = colorIndex; },
+                    selectedSwGlobalLed2Index,
+                    true
+                );
+
+                const syncCc2Start = () => {
+                    if (startInput.checked) {
+                        startBtn.classList.add("active");
+                        startBtn.setAttribute("aria-pressed", "true");
+                        startBtn.textContent = "-INICIAR FX LIGADO-";
+                    } else {
+                        startBtn.classList.remove("active");
+                        startBtn.setAttribute("aria-pressed", "false");
+                        startBtn.textContent = "-INICIAR FX DESLIGADO-";
+                    }
+                };
+                syncCc2Start();
+                startInput.addEventListener("change", () => { syncCc2Start(); updateSwGlobalDataFromUI(); });
+                startBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    startInput.checked = !startInput.checked;
+                    syncCc2Start();
+                    startInput.dispatchEvent(new Event("change", { bubbles: true }));
+                });
+
+                dynamicArea.style.display = "block";
+                needsInit = true;
+            }
+
+            if (needsInit) { dynamicArea.querySelectorAll('select').forEach(el => initializeCustomSelect(el)); }
+        }
+
+        function populateSelect(id, options) {
+            const select = document.getElementById(id);
+            if (!select) return;
+            select.innerHTML = '';
+            options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt.value;
+                option.textContent = opt.text;
+                select.appendChild(option);
+            });
+        }
+
+        function isChannelSelectId(id) {
+            const lower = (id || '').toLowerCase();
+            return lower.includes('channel') || lower.includes('_ch');
+        }
+
+        function populateNumericSelect(id, min, max, def) {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            sel.innerHTML = '';
+            const isChannelSelect = isChannelSelectId(id);
+            for (let i = min; i <= max; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = (isChannelSelect && i === 0) ? 'X' : i;
+                if (i === def) opt.selected = true;
+                sel.appendChild(opt);
+            }
+        }
+
+        function updateCustomSelectVisual(selectElement) {
+            if (!selectElement) return;
+            const wrapper = selectElement.closest('.custom-select-wrapper');
+            if (!wrapper) return;
+            const trigger = wrapper.querySelector('.custom-select-trigger');
+            if (trigger) {
+                trigger.textContent = selectElement.options[selectElement.selectedIndex]?.text || '';
+            }
+        }
+
+        function newLabel(text) { const l = document.createElement('label'); l.textContent = text; return l; }
+        function newNumericInput(id, min, max, value) {
+            const sel = document.createElement('select');
+            sel.id = id;
+            const isChannelSelect = isChannelSelectId(id);
+            for (let i = min; i <= max; i++) {
+                const opt = document.createElement('option');
+                opt.value = i; opt.textContent = (isChannelSelect && i === 0) ? 'X' : i;
+                if (i === value) opt.selected = true;
+                sel.appendChild(opt);
+            }
+            // Adiciona listener para atualizar a barra de progresso
+            sel.addEventListener('change', () => updateSpinKnobVisual(id));
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'custom-select-wrapper';
+            wrapper.dataset.selectId = id;
+            wrapper.appendChild(sel);
+            return wrapper;
+        }
+        function newToggleSwitch(id, initialChecked, parentElement) {
+            const label = document.createElement('label');
+            label.className = 'toggle-label';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = id;
+            input.checked = initialChecked;
+            const span = document.createElement('span');
+            span.className = 'toggle-switch';
+            span.innerHTML = '<span class="toggle-slider"></span>';
+            label.appendChild(input);
+            label.appendChild(span);
+            parentElement.appendChild(label);
+        }
+        function generateSingleSpinUI(parent, data, index, sendAsPc = false) {
+            const group = document.createElement('div'); group.className = 'extras-group';
+            group.innerHTML = `<h4>SPIN ${index + 1}</h4>`;
+
+            const sendRow = document.createElement('div');
+            sendRow.className = 'form-group';
+            const sendLabel = newLabel('Envio:');
+            sendRow.appendChild(sendLabel);
+            const sendCheckbox = document.createElement('input');
+            sendCheckbox.type = 'checkbox';
+            sendCheckbox.id = 'spinSendPcToggle_global';
+            sendCheckbox.style.display = 'none';
+            sendCheckbox.checked = !!sendAsPc;
+            const sendBtn = document.createElement('button');
+            sendBtn.type = 'button';
+            sendBtn.id = 'spinSendPcBtn_global';
+            sendBtn.className = 'single-toggle-button';
+            sendRow.appendChild(sendCheckbox);
+            sendRow.appendChild(sendBtn);
+            group.appendChild(sendRow);
+            const syncSpinSend = () => {
+                syncSpinSendPcGlobal(undefined, true);
+                try { updateSwGlobalDataFromUI(); } catch(_) {}
+            };
+            sendCheckbox.addEventListener('change', syncSpinSend);
+            sendBtn.addEventListener('click', (e) => { e.preventDefault(); sendCheckbox.checked = !sendCheckbox.checked; syncSpinSend(); });
+            syncSpinSendPcGlobal(!!sendAsPc);
+
+            const row = document.createElement('div'); row.className = 'spin-values-row';
+            ['Valor 1:', 'Valor 2:', 'Valor 3:'].forEach((lbl, i) => {
+                const item = document.createElement('div'); item.className = 'spin-value-item';
+                const selectId = `spinV${i+1}_${index}`;
+                item.appendChild(newLabel(lbl));
+                item.appendChild(newNumericInput(selectId, 0, 127, data[`v${i+1}`]));
+                
+                const knobPlaceholder = document.createElement('div'); 
+                knobPlaceholder.className = 'spin-knob-placeholder';
+                const progressBar = document.createElement('div');
+                progressBar.className = 'spin-knob-progress-bar';
+                progressBar.id = `${selectId}_progress`; 
+                const percentageText = document.createElement('span');
+                percentageText.id = `${selectId}_text`; 
+                progressBar.appendChild(percentageText);
+                knobPlaceholder.appendChild(progressBar);
+                item.appendChild(knobPlaceholder);
+
+                row.appendChild(item);
+                setTimeout(() => updateSpinKnobVisual(selectId), 0);
+            });
+            group.appendChild(row); parent.appendChild(group);
+        }
+        function generateSingleControlUI(parent, data, index) {
+            const group = document.createElement('div'); group.className = 'extras-group';
+            group.innerHTML = `<h4>CONTROL ${index + 1}</h4>`;
+            const row = document.createElement('div'); row.className = 'control-inline-group';
+            const ccCont = document.createElement('div'); ccCont.className = 'control-cc-container';
+            ccCont.appendChild(newLabel('CC:'));
+            ccCont.appendChild(newNumericInput(`controlCC_${index}`, 0, 127, data.cc));
+            row.appendChild(ccCont);
+            const toggleCont = document.createElement('div'); toggleCont.className = 'control-toggle-container';
+            toggleCont.appendChild(newLabel('Invertido:'));
+            newToggleSwitch(`controlInvertToggle_${index}`, data.modo_invertido, toggleCont);
+            row.appendChild(toggleCont);
+            group.appendChild(row); parent.appendChild(group);
+        }
+        function generateSingleCustomUI(parent, data, index, showOnlyOn) {
+            const group = document.createElement('div'); group.className = 'extras-group';
+            group.innerHTML = `<h4>CUSTOM ${index + 1}</h4>`;
+            const row = document.createElement('div'); row.className = 'custom-inline-group';
+
+            if (!showOnlyOn) {
+                const offCont = document.createElement('div'); offCont.className = 'custom-value-container';
+                const offSelectId = `customOff_${index}`;
+                offCont.appendChild(newLabel('Valor OFF:'));
+                offCont.appendChild(newNumericInput(offSelectId, 0, 127, data.valor_off));
+                const knobOff = document.createElement('div'); knobOff.className = 'spin-knob-placeholder';
+                knobOff.innerHTML = `<div class="spin-knob-progress-bar" id="${offSelectId}_progress"><span id="${offSelectId}_text"></span></div>`;
+                offCont.appendChild(knobOff);
+                row.appendChild(offCont);
+                setTimeout(() => updateSpinKnobVisual(offSelectId), 0);
+            }
+
+            const onCont = document.createElement('div'); onCont.className = 'custom-value-container';
+            const onSelectId = `customOn_${index}`;
+            onCont.appendChild(newLabel('Valor ON:'));
+            onCont.appendChild(newNumericInput(onSelectId, 0, 127, data.valor_on));
+            const knobOn = document.createElement('div'); knobOn.className = 'spin-knob-placeholder';
+            knobOn.innerHTML = `<div class="spin-knob-progress-bar" id="${onSelectId}_progress"><span id="${onSelectId}_text"></span></div>`;
+            onCont.appendChild(knobOn);
+            row.appendChild(onCont);
+            setTimeout(() => updateSpinKnobVisual(onSelectId), 0);
+
+            group.appendChild(row); parent.appendChild(group);
+        }
+
+        function updateSpinKnobVisual(selectId) {
+            const selectElement = document.getElementById(selectId);
+            const progressBar = document.getElementById(selectId + '_progress');
+            const textElement = document.getElementById(selectId + '_text');
+            if (selectElement && progressBar && textElement) {
+                const value = parseInt(selectElement.value, 10);
+                const percentage = Math.round((value / 127) * 100);
+                progressBar.style.width = percentage + '%';
+                textElement.textContent = percentage + '%';
+            }
+        }
+
+        function createFavoritePresetSelect(swNum, initialValue = 0) {
+            const originalSelectId = `swFavoritePresetSelect_${swNum}`;
+            const containerId = `swFavoritePresetContainer_${swNum}`;
+            
+            document.getElementById(containerId)?.remove();
+
+            const formGroup = document.createElement('div');
+            formGroup.className = 'form-group'; 
+            formGroup.id = containerId;
+
+            const label = document.createElement('label');
+            label.htmlFor = originalSelectId;
+            label.textContent = 'Preset (A1-F6):';
+            formGroup.appendChild(label);
+
+            const select = document.createElement('select');
+            select.id = originalSelectId;
+            select.name = originalSelectId;
+
+            // Gera opÃ§Ãµes em ordem linha->coluna (A1..A6, B1..B6, ..., F1..F6)
+            // Valor do option = Ã­ndice global row-major: idx = r * 6 + c
+            for (let r = 0; r < 5; r++) { // A..E
+                for (let c = 0; c < 6; c++) { // 1..6
+                    const idx = r * 6 + c;
+                    const option = document.createElement('option');
+                    option.value = idx;
+                    option.textContent = String.fromCharCode(65 + r) + (c + 1);
+                    if (idx === initialValue) option.selected = true;
+                    select.appendChild(option);
+                }
+            }
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'custom-select-wrapper';
+            wrapper.dataset.selectId = originalSelectId;
+            wrapper.appendChild(select);
+            formGroup.appendChild(wrapper);
+
+            // Initialize this new select as a custom one
+            initializeCustomSelect(select);
+
+            return formGroup;
+        }
+
+    </script>
+</body>
+
+</html>

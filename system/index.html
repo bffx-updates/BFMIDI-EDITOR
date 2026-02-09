@@ -1,0 +1,2259 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BFMIDI - System</title>
+  <style>
+    :root{
+      --bg:#070910;
+      --bg-soft:#0c1018;
+      --card:#131822;
+      --muted:#9aa5b3;
+      --accent:#39a0ff;
+      --accent-soft:rgba(57,160,255,0.2);
+      --success:#4CAF50;
+      --danger:#ff5c5c;
+      --glass:rgba(255,255,255,0.02);
+      --radius:14px;
+      --shadow-soft:0 14px 40px rgba(0,0,0,0.65);
+      --transition-fast:160ms ease;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(57,160,255,0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(124,58,237,0.12), transparent 55%),
+        linear-gradient(180deg,#05060a 0%, #080b11 100%);
+      color:#e6eef6;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .page{
+      max-width:1040px;
+      margin:20px auto 26px auto;
+      padding:20px;
+      box-sizing:border-box;
+    }
+
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0));
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 10px 30px rgba(0,0,0,0.55);
+      backdrop-filter:blur(10px);
+      animation:fadeDown 260ms ease-out;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .logo{
+      width:70px;
+      height:44px;
+      border-radius:14px;
+      background:radial-gradient(circle at 30% 0%,#7be0ff 0%,#39a0ff 36%,#1b2840 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      letter-spacing:0.06em;
+      font-size:0.7rem;
+      text-transform:uppercase;
+      color:#02060c;
+      box-shadow:0 10px 26px rgba(0,0,0,0.75), inset 0 -4px 8px rgba(0,0,0,0.35);
+    }
+
+    h1{
+      font-size:1.2rem;
+      margin:0;
+      font-weight:700;
+      letter-spacing:0.14em;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:0.76rem;
+      margin-top:3px;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+    .subtitle .fw-version{
+      color:#ffa500;
+      font-weight:700;
+    }
+
+    .badge-pill{
+      padding:4px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(7,9,16,0.96);
+      color:var(--muted);
+      font-size:0.78rem;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.6);
+    }
+
+    .badge-dot{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 10px var(--accent);
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: minmax(0,1.8fr) minmax(260px,0.9fr);
+      gap:18px;
+      margin-top:6px;
+    }
+
+    @media (max-width:860px){
+      .grid{
+        grid-template-columns:1fr;
+        padding-bottom:16px;
+      }
+    }
+
+    .card{
+      background:
+        radial-gradient(circle at top left, rgba(57,160,255,0.06), transparent 70%),
+        radial-gradient(circle at bottom right, rgba(255,255,255,0.02), transparent 70%),
+        var(--bg-soft);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:var(--radius);
+      padding:14px;
+      box-shadow:var(--shadow-soft);
+      backdrop-filter:blur(14px);
+      animation:fadeUp 260ms ease-out;
+    }
+
+    /* Blocos por função: cada .section é uma moldura completa (título + campos + botões) */
+    .section{
+      padding:14px 12px 14px 12px;
+      margin:16px 0;
+      border-radius:14px;
+      box-shadow:0 10px 26px rgba(0,0,0,0.9);
+      background:
+        radial-gradient(circle at top left, rgba(57,160,255,0.16), transparent 70%),
+        radial-gradient(circle at bottom right, rgba(57,160,255,0.10), transparent 70%),
+        linear-gradient(180deg, rgba(4,8,16,1), rgba(1,3,8,1));
+      border:1px solid rgba(57,160,255,0.75);
+    }
+
+    /* TODOS OS CARDS DO SYSTEM EM AZUL UNIFICADO */
+    .section.config,
+    .section.backup,
+    .section.restore,
+    .section.monitor {
+      border-color: rgba(57,160,255,0.95);
+    }
+
+    .section.logs {
+      border-color: rgba(255,200,0,0.95);
+      background: linear-gradient(180deg, rgba(255,200,0,0.12), rgba(1,3,8,1));
+    }
+
+    .section.reset {
+      border-color: rgba(255,0,144,0.95);
+      background: linear-gradient(180deg, rgba(255,0,144,0.22), rgba(9,3,16,1));
+    }
+
+    .section:last-child{
+      margin-bottom:0;
+    }
+
+    .section-header{
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:10px;
+      margin-bottom:8px;
+    }
+
+    .section-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:0;
+      border-radius:0;
+      font-size:1.1rem;
+      font-weight:800;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+      box-shadow:none;
+      border:none;
+      background:transparent;
+      color:#e6eef6;
+    }
+
+    .section-pill .icon{
+      width:10px;
+      height:10px;
+      border-radius:4px;
+      background:var(--accent);
+      box-shadow:0 0 10px rgba(57,160,255,0.9);
+    }
+
+    .section-pill.config span.icon{
+      background:var(--accent);
+    }
+
+    .section-pill.backup span.icon{
+      background:rgba(124,58,237,1);
+    }
+
+    .section-pill.restore span.icon{
+      background:rgba(57,160,255,1);
+    }
+
+    .section-pill.monitor span.icon{
+      background:rgba(0,221,0,1);
+    }
+
+    .section-pill.logs span.icon{
+      background:rgba(255,200,0,1);
+      box-shadow:0 0 10px rgba(255,200,0,0.9);
+    }
+
+    .section-subtitle{
+      font-size:0.78rem;
+      color:var(--muted);
+      margin-left:2px;
+      display:none;
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .col{
+      flex:1;
+      min-width:160px;
+    }
+
+    label{
+      display:block;
+      font-weight:600;
+      margin-bottom:6px;
+      color:#cfe7ff;
+      font-size:0.9rem;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .btn{
+      padding:8px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      color:#071025;
+      background:linear-gradient(180deg,#e6f7ff,#cfeaff);
+      box-shadow:0 6px 14px rgba(0,0,0,0.35);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast);
+      text-align:center;
+      box-sizing:border-box;
+      min-width:150px;
+      height:36px;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 12px 26px rgba(0,0,0,0.75);
+      background:linear-gradient(180deg,#f4fbff,#d9efff);
+    }
+
+    .btn.ghost{
+      background:transparent;
+      color:var(--danger);
+      border:1px solid var(--danger);
+      box-shadow:none;
+    }
+
+    .btn.btn-reset {
+      background: transparent;
+      color: #ffffff;
+      border: 2px solid #ffffff;
+      box-shadow: none;
+    }
+    .btn.btn-reset:hover {
+      background: rgba(255,255,255,0.06);
+      color: #ffffff;
+      box-shadow:none;
+    }
+
+    /* Botão de orientação da tela na Configuração da Placa */
+    .btn-orientacao {
+      min-width: 160px;
+      height: 36px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(6,10,18,1), rgba(3,6,12,1));
+      color: #39a0ff;
+      border: 2px solid #39a0ff;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.65);
+    }
+    .btn-orientacao.invertida {
+      color: #ff0080;
+      border-color: #ff0080;
+      background: linear-gradient(180deg, rgba(10,5,12,1), rgba(5,2,6,1));
+      box-shadow: 0 6px 16px rgba(255,0,128,0.35);
+    }
+
+    .btn.save{
+      background:linear-gradient(180deg,var(--success),#3ca94a);
+      color:#fff;
+      box-shadow:0 8px 20px rgba(76,175,80,0.4);
+    }
+
+    .btn.danger{
+      background:linear-gradient(180deg,#ff0080,#ff4da6); /* magenta */
+      color:#fff;
+      box-shadow:0 8px 20px rgba(255,0,128,0.4);
+    }
+
+    .btn.small{
+      min-width:120px;
+      height:32px;
+      font-size:0.8rem;
+      padding:6px 10px;
+    }
+
+    .backup-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:8px;
+      flex-wrap:wrap;
+    }
+
+    .backup-actions > div{
+      flex:1 1 0;
+      min-width:0;
+    }
+
+    .backup-actions input[type="file"]{
+      display:block;
+      width:100%;
+      height:32px;
+      padding:6px 10px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.1);
+      background:#15181c;
+      color:#ffffff;
+      box-sizing:border-box;
+      cursor:pointer;
+      outline:none;
+      font-size:0.8rem;
+    }
+
+    .custom-select-wrapper{
+      position:relative;
+      width:100%;
+      font-family:'Open Sans',sans-serif;
+    }
+
+    .custom-select-wrapper select{
+      display:none !important;
+    }
+
+    .custom-select-trigger{
+      height:34px;
+      padding:6px 12px;
+      border-radius:10px;
+      background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.015));
+      border:1px solid rgba(255,255,255,0.05);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      cursor:pointer;
+      box-sizing:border-box;
+      color:#dbefff;
+      transition:
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast),
+        background var(--transition-fast),
+        border-color var(--transition-fast);
+    }
+
+    .custom-select-trigger:hover{
+      box-shadow:0 10px 24px rgba(0,0,0,0.5);
+      transform:translateY(-2px);
+      background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));
+      border-color:rgba(57,160,255,0.4);
+    }
+
+    .custom-select-trigger .label{
+      flex:1;
+      text-align:left;
+      padding-right:8px;
+      color:#e6eef6;
+      font-weight:600;
+      font-size:0.85rem;
+    }
+
+    .custom-select-trigger .arrow{
+      width:18px;
+      height:18px;
+      border-radius:6px;
+      background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:inset 0 -1px 0 rgba(0,0,0,0.2);
+      margin-left:8px;
+    }
+
+    .custom-select-trigger .arrow::after{
+      content:'';
+      width:0;
+      height:0;
+      border-left:6px solid transparent;
+      border-right:6px solid transparent;
+      border-top:7px solid #6fb7ff;
+    }
+
+    .custom-options-panel{
+      position:absolute;
+      top:calc(100% + 8px);
+      left:0;
+      right:0;
+      background:linear-gradient(180deg,#22272b,#131415);
+      border:1px solid rgba(255,255,255,0.04);
+      border-radius:12px;
+      max-height:240px;
+      overflow:auto;
+      z-index:1000;
+      box-shadow:0 30px 60px rgba(0,0,0,0.65);
+      display:none;
+      padding:8px;
+      opacity:0;
+      transform:translateY(-8px);
+      transition:opacity 160ms ease, transform 160ms ease;
+    }
+
+    .custom-options-panel.show{
+      display:block;
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .custom-option{
+      padding:8px 12px;
+      cursor:pointer;
+      color:#cfe7ff;
+      border-radius:8px;
+      margin:4px 0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      transition:background 120ms ease, transform 80ms ease, border-color 80ms ease;
+      border:1px solid transparent;
+      font-size:0.8rem;
+    }
+
+    .custom-option:hover{
+      background:linear-gradient(90deg,rgba(57,160,255,0.06),rgba(57,160,255,0.02));
+      transform:translateY(-1px);
+      border-color:rgba(57,160,255,0.1);
+    }
+
+    .custom-option.selected{
+      background:linear-gradient(90deg,rgba(57,160,255,0.14),rgba(57,160,255,0.04));
+      color:#ffffff;
+      font-weight:700;
+      border-color:rgba(57,160,255,0.18);
+      box-shadow:0 6px 18px rgba(57,160,255,0.14);
+    }
+
+    .custom-option .check{
+      width:16px;
+      height:16px;
+      border-radius:4px;
+      background:rgba(255,255,255,0.03);
+      display:inline-block;
+      margin-left:8px;
+      box-shadow:inset 0 -2px 6px rgba(0,0,0,0.25);
+    }
+
+    .custom-option.selected .check{
+      background:linear-gradient(90deg,#39a0ff,#7be0ff);
+      box-shadow:0 4px 12px rgba(57,160,255,0.25);
+    }
+
+    .custom-options-panel::-webkit-scrollbar{
+      width:8px;
+    }
+
+    .custom-options-panel::-webkit-scrollbar-thumb{
+      background:linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.04));
+      border-radius:8px;
+    }
+
+    .small{
+      font-size:0.82rem;
+      color:var(--muted);
+    }
+
+    .info{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .info-card{
+      background:var(--card);
+      border-radius:12px;
+      padding:12px;
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow:0 10px 26px rgba(0,0,0,0.75);
+    }
+
+    .info-title{
+      font-weight:600;
+      font-size:0.9rem;
+      color:#dff3ff;
+      margin-bottom:6px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .info-title span.icon{
+      width:10px;
+      height:10px;
+      border-radius:4px;
+      background:var(--accent);
+      box-shadow:0 0 10px rgba(57,160,255,0.9);
+    }
+
+    .info-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      font-size:0.86rem;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    .info-value{
+      font-weight:700;
+      color:#e7f9ff;
+    }
+
+    .mem-bar{
+      height:10px;
+      width:100%;
+      background:rgba(255,255,255,0.02);
+      border-radius:999px;
+      overflow:hidden;
+      margin-top:6px;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    .mem-bar-fill{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--accent),#7be0ff);
+      transition:width 400ms ease;
+    }
+
+    .footer{
+      margin-top:18px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .notice{
+      color:var(--muted);
+      font-size:0.86rem;
+    }
+
+    /* Barra flutuante de ações (igual padrão GLOBAL_CONFIG) */
+    .floating-footer-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: rgba(7,9,16,0.98);
+      padding: 10px 0;
+      box-shadow: 0 -2px 18px rgba(0,0,0,0.7);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      backdrop-filter: blur(12px);
+      box-sizing: border-box;
+    }
+    .floating-footer-bar .btn-container {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      width: 100%;
+      max-width: 380px;
+      margin-top: 0;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+    .floating-footer-bar .btn-voltar,
+    .floating-footer-bar .btn-salvar {
+      background: transparent;
+      box-shadow: none;
+      height: 40px;
+      min-width: 140px;
+      max-width: 160px;
+      padding: 0 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-sizing: border-box;
+      white-space: nowrap;
+      transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast);
+    }
+    .floating-footer-bar .btn-salvar {
+      border: 2px solid var(--success);
+      color: var(--success);
+      position: relative;
+      overflow: hidden;
+    }
+    .floating-footer-bar .btn-salvar::before {
+      content: '';
+      position: absolute;
+      inset: -18px;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.06), transparent 70%),
+        radial-gradient(circle at bottom, rgba(76,175,80,0.18), transparent 80%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+    .floating-footer-bar .btn-salvar:hover::before {
+      opacity: 1;
+    }
+    .floating-footer-bar .btn-salvar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.95);
+      background-color: rgba(76,175,80,0.10);
+    }
+    .floating-footer-bar .btn-voltar {
+      border: 2px solid #ff00aa;
+      color: #ff00aa;
+      position: relative;
+      overflow: hidden;
+    }
+    .floating-footer-bar .btn-voltar::before {
+      content: '';
+      position: absolute;
+      inset: -18px;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.04), transparent 70%),
+        radial-gradient(circle at bottom, rgba(255,0,170,0.20), transparent 80%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+    }
+    .floating-footer-bar .btn-voltar:hover::before {
+      opacity: 1;
+    }
+    .floating-footer-bar .btn-voltar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.95);
+      background-color: rgba(255,0,170,0.10);
+    }
+
+    @keyframes fadeDown{
+      from{opacity:0;transform:translateY(-8px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(8px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+
+    @media (max-width:520px){
+      .backup-actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .btn,
+      .backup-actions .btn{
+        width:100%;
+        min-width:0;
+      }
+      .custom-select-trigger{
+        height:40px;
+      }
+    }
+  </style>
+  <script src="/js/parity-bridge-client.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="brand">
+        <div class="logo">BFMiDI</div>
+        <div>
+          <h1>SISTEMA</h1>
+          <div class="subtitle">Firmware: <span id="fwMain" class="fw-version">--</span></div>
+        </div>
+      </div>
+      <div class="badge-pill" style="visibility:hidden;">
+        <span class="badge-dot"></span>
+        <span>Firmware</span>
+        <strong>--</strong>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: CONFIG + BACKUP + MONITOR -->
+      <div class="card">
+
+        <!-- Section: Configuração da Placa -->
+        <div class="section config">
+          <div class="section-header">
+            <div class="section-pill config">
+              <span class="icon"></span>
+              <span>Configuração da Placa</span>
+            </div>
+            <div class="section-subtitle">Selecione o modelo e opções de tela</div>
+          </div>
+
+          <label for="board-select">Placa selecionada</label>
+          <div class="custom-select-wrapper">
+            <div class="custom-select-trigger" id="boardSelectDisplay">
+              <span class="label" id="boardSelectLabel">Selecione a placa</span>
+              <div class="arrow"></div>
+            </div>
+            <div class="custom-options-panel" id="boardOptionsPanel"></div>
+          </div>
+          <select id="board-select" name="board" onchange="onBoardChange(this.value)" style="display:none">
+            <option value="BFMIDI-1 7S_B1" >BFMIDI-1 7S_B1</option>
+            <option value="BFMIDI-1 7S_C1" >BFMIDI-1 7S_C1</option>
+            <option value="BFMIDI-1 7S_A1" >BFMIDI-1 7S_A1</option>
+            <option value="BFMIDI-1 4S" >BFMIDI-1 4S</option>
+            <option value="BFMIDI-2 6S" >BFMIDI-2 6S</option>
+            <option value="BFMIDI-2 4S" >BFMIDI-2 4S</option>
+            <option value="BFMIDI-2 7S" >BFMIDI-2 7S</option>
+            <option value="BFMIDI-2 NANO" >BFMIDI-2 NANO</option>
+            <option value="BFMIDI-2 MICRO" >BFMIDI-2 MICRO</option>
+          </select>
+
+          <div class="row" style="margin-top:10px; align-items:center;">
+            <div class="col" style="flex:1; min-width:220px;">
+              <label for="invertTela">Inverter Tela</label>
+              <span class="small">Rotaciona a tela (1) para instalações invertidas.</span>
+            </div>
+            <!-- Checkbox removido; estado controlado apenas pelo botão TELA NORMAL / TELA INVERTIDA -->
+            <input type="hidden" id="invertTela" value="0" />
+          </div>
+
+          <div class="controls">
+            <button
+              id="btnTelaOrientacao"
+              class="btn btn-orientacao"
+              type="button"
+              onclick="toggleTelaOrientacao()">
+              TELA NORMAL
+            </button>
+          </div>
+        </div>
+
+        <!-- Section: Backup -->
+        <div class="section backup">
+          <div class="section-header">
+            <div class="section-pill backup">
+              <span class="icon"></span>
+              <span>Backup</span>
+            </div>
+            <div class="section-subtitle"></div>
+          </div>
+
+          <div class="backup-actions">
+            <button class="btn small" id="btnBackupClient" type="button" onclick="downloadBackupClientSide()">Download Backup</button>
+          </div>
+
+          <div id="backupProgressContainer" style="margin-top:8px; display:none;">
+            <div class="mem-bar" style="margin-top:0;">
+              <div id="backupProgressBar" class="mem-bar-fill" style="width:0%;"></div>
+            </div>
+            <div id="backupProgressText" class="small" style="margin-top:4px;">Preparando...</div>
+          </div>
+          <div id="backupMessage" class="small" style="margin-top:6px;"></div>
+          <div id="backupBanner" style="display:none;margin-top:8px;padding:8px;border-radius:8px;background:linear-gradient(180deg,var(--success),#3ca94a);color:#071025;font-weight:700;text-align:center;font-size:0.86rem;"></div>
+        </div>
+
+        <!-- Section: Restaurar -->
+        <div class="section restore">
+          <div class="section-header">
+            <div class="section-pill restore">
+              <span class="icon"></span>
+              <span>Restaurar</span>
+            </div>
+            <div class="section-subtitle"></div>
+          </div>
+
+          <div class="backup-actions">
+            <div>
+              <input id="backupFile" type="file" accept=".json" />
+            </div>
+            <button class="btn small" id="restoreBtn" onclick="uploadBackup()">Upload & Restaurar</button>
+          </div>
+
+          <div id="restoreProgress" style="margin-top:8px; display:none;">
+            <div class="mem-bar" style="margin-top:0;">
+              <div id="progressBar" class="mem-bar-fill" style="width:0%;"></div>
+            </div>
+            <div id="progressText" class="small" style="margin-top:4px;">Aguardando envio...</div>
+          </div>
+          <div id="restoreMessage" class="small" style="margin-top:6px;"></div>
+          <div id="restoreBanner" style="display:none;margin-top:8px;padding:8px;border-radius:8px;background:linear-gradient(180deg,var(--success),#3ca94a);color:#071025;font-weight:700;text-align:center;font-size:0.86rem;"></div>
+        </div>
+
+        <!-- Section: Monitor MIDI -->
+        <div class="section monitor">
+          <div class="section-header">
+            <div class="section-pill monitor">
+              <span class="icon"></span>
+              <span>Monitor MIDI</span>
+            </div>
+            <div class="section-subtitle"></div>
+          </div>
+          <div class="controls" style="margin-top:4px;">
+            <button class="btn small" onclick="toggleMidiMonitor(event)">Abrir Monitor</button>
+          </div>
+          <div id="midiMonitor" style="display:none; margin-top:8px;">
+            <textarea id="midiLog" readonly
+              style="width:100%;height:260px;background-color:#050608;color:#00dd00;font-family:'Courier New',monospace;border:1px solid rgba(255,255,255,0.16);border-radius:10px;padding:10px;box-sizing:border-box;resize:vertical;box-shadow:0 8px 22px rgba(0,0,0,0.7);"></textarea>
+            <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
+              <button class="btn ghost small" onclick="clearMidiLog()">Limpar</button>
+              <button class="btn small" onclick="copyMidiLog(this)">Copiar Log</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Reset -->
+        <div class="section reset">
+          <div class="section-header">
+            <div class="section-pill restore" style="color: #ff00aa;">
+              <span class="icon" style="background: #ff00aa; box-shadow: 0 0 10px #ff00aa;"></span>
+              <span>Reset de Fábrica</span>
+            </div>
+          </div>
+          <div class="controls">
+            <button type="button" id="resetNvsButton" class="btn btn-reset" style="width: 100%;">RESETAR CONFIGURAÇÕES</button>
+          </div>
+          <div id="resetStatusMessage" style="margin-top: 10px; font-weight: bold; text-align: center; color: white;"></div>
+        </div>
+
+        <!-- Section: Hardware Test -->
+        <div class="section config" style="border-color: rgba(255,165,0,0.95);">
+          <div class="section-header">
+            <div class="section-pill config">
+              <span class="icon" style="background: #ffa500; box-shadow: 0 0 10px #ffa500;"></span>
+              <span>Teste de Hardware</span>
+            </div>
+          </div>
+          <div class="controls" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <button type="button" id="btnTestLeds" class="btn small" style="min-width: 0; background: linear-gradient(180deg, #ff6b6b, #ee5a5a); color: #fff;" onclick="startHardwareTest('leds')">
+              <span id="testLedsIcon">💡</span> LEDs
+            </button>
+            <button type="button" id="btnTestDisplay" class="btn small" style="min-width: 0; background: linear-gradient(180deg, #4ecdc4, #3dbdb5); color: #fff;" onclick="startHardwareTest('display')">
+              <span id="testDisplayIcon">🖥️</span> Display
+            </button>
+            <button type="button" id="btnTestMidi" class="btn small" style="min-width: 0; background: linear-gradient(180deg, #a855f7, #9333ea); color: #fff;" onclick="startHardwareTest('midi')">
+              <span id="testMidiIcon">🎹</span> MIDI
+            </button>
+          </div>
+          <div id="hardwareTestStatus" style="margin-top: 10px; text-align: center;">
+            <div id="testProgressContainer" style="display: none;">
+              <div class="mem-bar" style="margin-top: 0;">
+                <div id="testProgressBar" class="mem-bar-fill" style="width: 0%; background: linear-gradient(90deg, #ffa500, #ffcc00);"></div>
+              </div>
+              <div id="testProgressText" class="small" style="margin-top: 6px; color: #ffa500; font-weight: 600;"></div>
+            </div>
+            <div id="testResultMessage" class="small" style="margin-top: 6px;"></div>
+          </div>
+        </div>
+
+        <!-- Section: Logs do Sistema -->
+        <div class="section logs">
+          <div class="section-header">
+            <div class="section-pill logs">
+              <span class="icon"></span>
+              <span>Logs do Sistema</span>
+            </div>
+          </div>
+          <div class="info-card" style="margin-top:6px;">
+            <div class="info-title"><span class="icon"></span>Ultimo Reset</div>
+            <div class="info-row">
+              <span>Motivo</span>
+              <span id="resetReasonText" class="info-value">-</span>
+            </div>
+            <div class="info-row">
+              <span>Codigo</span>
+              <span id="resetReasonCode" class="info-value">-</span>
+            </div>
+          </div>
+          <div class="controls" style="margin-top:10px;">
+            <button class="btn small" type="button" onclick="tryFetchSystemInfo()">Atualizar</button>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- RIGHT: WIFI + STATUS / INFO -->
+      <div class="card">
+        <!-- Section: Wi-Fi -->
+        <div class="section config">
+          <div class="section-header">
+            <div class="section-pill config">
+              <span class="icon"></span>
+              <span>Conexão Wi-Fi</span>
+            </div>
+          </div>
+          
+          <!-- Status Visual do WiFi -->
+          <div style="background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px; margin-bottom: 14px;">
+            <div class="info-row" style="margin-top: 0;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="wifiStatusIcon" style="width: 10px; height: 10px; border-radius: 50%; background: #666; box-shadow: 0 0 8px rgba(102,102,102,0.6);"></span>
+                <span style="font-weight: 600; color: #cfe7ff;">Status da Conexão</span>
+              </div>
+              <div id="wifiStatus" class="info-value" style="font-size: 0.85rem;">Carregando...</div>
+            </div>
+            <div id="wifiCurrentNetwork" class="info-row" style="margin-top: 6px; display: none;">
+              <div style="color: var(--muted); font-size: 0.82rem;">Rede Atual</div>
+              <div id="wifiCurrentSSID" style="color: #7be0ff; font-weight: 700; font-size: 0.82rem;">-</div>
+            </div>
+          </div>
+          
+          <hr style="border-color: rgba(255,255,255,0.1); margin: 14px 0;">
+          
+          <!-- Toggle para habilitar STA -->
+          <div style="background: rgba(57,160,255,0.05); border: 1px solid rgba(57,160,255,0.2); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px;">
+            <div class="row" style="align-items: center; margin: 0;">
+              <label for="staEnabled" style="flex-grow: 1; margin: 0; font-size: 0.9rem; color: #dff3ff;">
+                <span style="display: block; font-weight: 700;">Modo STA (Cliente Wi-Fi)</span>
+                <span style="display: block; font-size: 0.75rem; color: var(--muted); margin-top: 2px;">Conectar este dispositivo a uma rede existente</span>
+              </label>
+              <input type="checkbox" id="staEnabled" onchange="updateWifiForm()" style="transform: scale(1.3); cursor: pointer;">
+            </div>
+          </div>
+
+          <!-- Formulário de Conexão WiFi -->
+          <div id="wifi-sta-form" style="display:none;">
+            
+            <!-- Botão de Procurar Redes -->
+            <div style="margin-bottom: 14px;">
+              <button id="scanWifiBtn" class="btn small" onclick="scanWifi()" style="width: 100%; min-width: 0;">
+                <span id="scanBtnIcon">📡</span> <span id="scanBtnText">Procurar Redes Wi-Fi</span>
+              </button>
+            </div>
+            
+            <!-- Seleção de Rede -->
+            <div style="margin-bottom: 12px;">
+              <label for="wifi-ssid" style="display: flex; align-items: center; gap: 6px;">
+                <span>🌐</span> Rede (SSID)
+              </label>
+              <select id="wifi-ssid" name="wifi-ssid" style="width:100%; height:36px; padding: 6px 12px; border-radius: 10px; background: #15181c; border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 0.9rem; cursor: pointer;">
+                <option value="">Selecione uma rede</option>
+              </select>
+            </div>
+            
+            <!-- Campo de Senha -->
+            <div style="margin-bottom: 14px;">
+              <label for="wifi-password" style="display: flex; align-items: center; gap: 6px;">
+                <span>🔒</span> Senha da Rede
+              </label>
+              <input type="password" id="wifi-password" placeholder="Digite a senha" style="width:100%; height:36px; padding: 6px 12px; border-radius: 10px; background: #15181c; border: 1px solid rgba(255,255,255,0.15); color: white; box-sizing: border-box; font-size: 0.9rem;">
+            </div>
+            
+            <!-- Botões de Ação -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <button class="btn ghost small" onclick="forgetWifiNetwork()" style="min-width: 0; border-color: #ff6b6b; color: #ff6b6b;">
+                <span>🗑️</span> Esquecer
+              </button>
+              <button class="btn save small" onclick="connectToWifi()" style="min-width: 0;">
+                <span>💾</span> Conectar
+              </button>
+            </div>
+            
+            <!-- Feedback de Status -->
+            <div id="wifi-connect-status" class="small" style="margin-top: 10px; padding: 8px; border-radius: 8px; display: none;"></div>
+          </div>
+        </div>
+      </div>
+      <aside class="info">
+        <div class="info-card">
+          <div class="info-title">
+            <span class="icon"></span>
+            <span>Informações do Sistema</span>
+          </div>
+          <div class="info-row">
+            <div>Firmware</div>
+            <div id="fwVal" class="info-value">--</div>
+          </div>
+          <div class="info-row" style="margin-top:4px;">
+            <div>NVS - Uso</div>
+            <div id="nvsPercent" class="info-value">0%</div>
+          </div>
+          <div class="mem-bar">
+            <div id="memFill" class="mem-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div class="info-row" style="margin-top:4px;font-size:0.8rem;">
+            <div id="nvsUsed">Usado: 0 bytes</div>
+            <div id="nvsTotal">Total: 0 bytes</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">
+      <div class="notice">&nbsp;</div>
+      <div class="small">Última atualização: --</div>
+    </div>
+  </div>
+
+  <div class="floating-footer-bar">
+    <div class="btn-container">
+      <button type="button" class="btn btn-voltar" onclick="window.location.href='/'">Voltar</button>
+      <button type="button" class="btn btn-salvar" onclick="saveAndRestart()">Salvar</button>
+    </div>
+  </div>
+
+  <script>
+    let midiSocket;
+
+    function toggleMidiMonitor(event) {
+      const monitor = document.getElementById('midiMonitor');
+      const button = event.currentTarget;
+      if (monitor.style.display === 'none') {
+        monitor.style.display = 'block';
+        button.textContent = 'Fechar Monitor';
+        startMidiSocket();
+      } else {
+        monitor.style.display = 'none';
+        button.textContent = 'Abrir Monitor';
+        stopMidiSocket();
+      }
+    }
+
+    function startMidiSocket() {
+      const log = document.getElementById('midiLog');
+      log.value = 'Conectando ao monitor MIDI...\n';
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = wsProtocol + '//' + window.location.host + '/ws';
+
+      midiSocket = new WebSocket(wsUrl);
+
+      midiSocket.onopen = function() {
+        log.value += 'Conectado! Aguardando dados MIDI...\n============================================\n';
+        if (midiSocket.readyState === WebSocket.OPEN) {
+          midiSocket.send('start_midi_monitor');
+        }
+      };
+
+      midiSocket.onmessage = function(event) {
+        log.value += event.data;
+        log.scrollTop = log.scrollHeight;
+      };
+
+      midiSocket.onclose = function() {
+        log.value += '============================================\nDesconectado do monitor MIDI.\n';
+      };
+
+      midiSocket.onerror = function(error) {
+        log.value += 'Erro na conexao WebSocket. O servidor suporta WebSockets?\n';
+        console.error('WebSocket Error: ', error);
+      };
+    }
+
+    function stopMidiSocket() {
+      if (midiSocket) {
+        if (midiSocket.readyState === WebSocket.OPEN) {
+          midiSocket.send('stop_midi_monitor');
+        }
+        midiSocket.close();
+        midiSocket = null;
+      }
+    }
+
+    function copyMidiLog(button) {
+      const logTextarea = document.getElementById('midiLog');
+      const textToCopy = logTextarea.value;
+      if (!textToCopy) return;
+
+      const originalText = button.textContent;
+
+      function setCopied() {
+        button.textContent = 'Copiado!';
+        button.disabled = true;
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 2000);
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy)
+          .then(setCopied)
+          .catch(err => {
+            console.error('Erro ao copiar texto: ', err);
+            alert('Falha ao copiar o texto.');
+          });
+      } else {
+        logTextarea.select();
+        logTextarea.setSelectionRange(0, 99999);
+        try {
+          document.execCommand('copy');
+          setCopied();
+        } catch (err) {
+          console.error('Fallback: Erro ao copiar texto', err);
+          alert('Falha ao copiar o texto.');
+        }
+      }
+    }
+
+    function clearMidiLog() {
+      document.getElementById('midiLog').value = '';
+    }
+
+    function applyNvsInfo(info) {
+      try {
+        const usedPercent = (info && info.nvs && typeof info.nvs.usedPercent === 'number')
+          ? info.nvs.usedPercent
+          : parseInt('%%NVS_USED_PERCENT%%') || 0;
+        const used = (info && info.nvs && typeof info.nvs.usedBytes === 'number')
+          ? info.nvs.usedBytes
+          : parseInt('0') || 0;
+        const total = (info && info.nvs && typeof info.nvs.totalBytes === 'number')
+          ? info.nvs.totalBytes
+          : parseInt('0') || 0;
+
+        document.getElementById('fwVal').innerText =
+          (info && info.firmwareVersion) ? info.firmwareVersion : '--';
+        document.getElementById('nvsPercent').innerText = usedPercent + '%';
+        document.getElementById('memFill').style.width = usedPercent + '%';
+        document.getElementById('nvsUsed').innerText = 'Usado: ' + used + ' bytes';
+        document.getElementById('nvsTotal').innerText = 'Total: ' + total + ' bytes';
+
+        const rrText = (info && info.resetReason) ? info.resetReason : '-';
+        const rrCode = (info && typeof info.resetReasonCode === 'number')
+          ? String(info.resetReasonCode)
+          : '-';
+        const rrTextEl = document.getElementById('resetReasonText');
+        const rrCodeEl = document.getElementById('resetReasonCode');
+        if (rrTextEl) rrTextEl.innerText = rrText;
+        if (rrCodeEl) rrCodeEl.innerText = rrCode;
+      } catch (e) {
+        console.error('applyNvsInfo error', e);
+      }
+    }
+
+    function tryFetchSystemInfo() {
+      fetch('/api/system/info')
+        .then(r => {
+          if (!r.ok) throw new Error('no api');
+          return r.json();
+        })
+        .then(j => applyNvsInfo(j))
+        .catch(() => applyNvsInfo(null));
+    }
+
+    function updateTelaOrientacaoButton() {
+      const invEl = document.getElementById('invertTela');
+      const btn = document.getElementById('btnTelaOrientacao');
+      if (!invEl || !btn) return;
+      const invertida = (invEl.value === '1');
+      if (invertida) {
+        btn.textContent = 'TELA INVERTIDA';
+        btn.classList.add('invertida');
+      } else {
+        btn.textContent = 'TELA NORMAL';
+        btn.classList.remove('invertida');
+      }
+    }
+
+    function toggleTelaOrientacao() {
+      const invEl = document.getElementById('invertTela');
+      if (!invEl) return;
+      invEl.value = (invEl.value === '1') ? '0' : '1';
+      updateTelaOrientacaoButton();
+    }
+
+    function setupResetButton() {
+      const resetNvsButton = document.getElementById('resetNvsButton');
+      const resetStatusMessage = document.getElementById('resetStatusMessage');
+      if (resetNvsButton && resetStatusMessage) {
+        resetNvsButton.addEventListener('click', () => {
+          if (confirm('Tem certeza que deseja resetar TODAS as configurações para o padrão de fábrica? Esta ação é irreversível e o dispositivo será reiniciado.')) {
+            resetStatusMessage.textContent = 'Processando reset...';
+            resetStatusMessage.style.color = 'orange';
+
+            fetch('/api/system/nvs-erase', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => {
+              if (response.ok) return response.json();
+              throw new Error('Falha na resposta do servidor.');
+            })
+            .then(result => {
+              if (result.success) {
+                resetStatusMessage.textContent = 'Configurações resetadas! O dispositivo será reiniciado.';
+                resetStatusMessage.style.color = 'var(--success)';
+              } else {
+                resetStatusMessage.textContent = 'Erro ao resetar: ' + (result.message || 'Erro desconhecido.');
+                resetStatusMessage.style.color = 'var(--danger)';
+              }
+            })
+            .catch(error => {
+              console.error('Erro ao resetar NVS:', error);
+              resetStatusMessage.textContent = 'Erro de comunicação ao resetar.';
+              resetStatusMessage.style.color = 'var(--danger)';
+            });
+          }
+        });
+      }
+      updateTelaOrientacaoButton();
+    }
+
+    // --- Funções Wi-Fi ---
+    function setupWifiEvents() {
+      const evtSource = new EventSource('/events');
+      
+      evtSource.onopen = function() {
+        console.log("Conexão de eventos estabelecida.");
+      };
+
+      evtSource.addEventListener("wifiscan", function(event) {
+        console.log("Evento 'wifiscan' recebido.");
+        const scanBtn = document.getElementById('scanWifiBtn');
+        const ssidSelect = document.getElementById('wifi-ssid');
+        
+        try {
+          const networks = JSON.parse(event.data);
+          ssidSelect.innerHTML = '<option value="">Selecione uma rede</option>';
+          networks.sort((a, b) => b.rssi - a.rssi); // Ordena por força do sinal
+          networks.forEach(net => {
+            const signalStrength = net.rssi > -50 ? 'Excelente' : net.rssi > -70 ? 'Bom' : 'Fraco';
+            const label = `${net.ssid} (${signalStrength})`;
+            const option = new Option(label, net.ssid);
+            ssidSelect.add(option);
+          });
+        } catch (e) {
+          console.error("Erro ao processar dados do evento wifiscan:", e);
+          ssidSelect.innerHTML = '<option value="">Falha ao processar redes</option>';
+        } finally {
+          scanBtn.disabled = false;
+          scanBtn.textContent = 'Procurar Redes';
+        }
+      });
+
+      evtSource.onerror = function(err) {
+        console.error("Erro no EventSource:", err);
+      };
+    }
+
+    function updateWifiStatus() {
+      fetch('/api/wifi/status')
+        .then(response => response.json())
+        .then(data => {
+          const statusText = data.status || 'Desconhecido';
+          const statusIcon = document.getElementById('wifiStatusIcon');
+          const statusDiv = document.getElementById('wifiStatus');
+          const currentNetworkDiv = document.getElementById('wifiCurrentNetwork');
+          const currentSSIDDiv = document.getElementById('wifiCurrentSSID');
+          
+          statusDiv.textContent = statusText;
+          
+          // Atualiza ícone de status com cores
+          if (statusText.includes('Conectado')) {
+            statusIcon.style.background = '#4CAF50';
+            statusIcon.style.boxShadow = '0 0 12px rgba(76, 175, 80, 0.8)';
+            currentNetworkDiv.style.display = 'flex';
+            currentSSIDDiv.textContent = data.sta_ssid || '-';
+          } else if (statusText.includes('Conectando')) {
+            statusIcon.style.background = '#ffa500';
+            statusIcon.style.boxShadow = '0 0 12px rgba(255, 165, 0, 0.8)';
+            currentNetworkDiv.style.display = 'none';
+          } else {
+            statusIcon.style.background = '#666';
+            statusIcon.style.boxShadow = '0 0 8px rgba(102, 102, 102, 0.6)';
+            currentNetworkDiv.style.display = 'none';
+          }
+          
+          const staEnabledCheckbox = document.getElementById('staEnabled');
+          staEnabledCheckbox.checked = data.sta_enabled || false;
+          
+          const ssidSelect = document.getElementById('wifi-ssid');
+          // Adiciona o SSID salvo como uma opção se não estiver na lista
+          if (data.sta_ssid && !Array.from(ssidSelect.options).some(opt => opt.value === data.sta_ssid)) {
+              const option = new Option(data.sta_ssid, data.sta_ssid);
+              ssidSelect.add(option);
+          }
+          ssidSelect.value = data.sta_ssid || '';
+
+          updateWifiForm();
+        })
+        .catch(err => {
+          document.getElementById('wifiStatus').textContent = 'Erro ao carregar status';
+          document.getElementById('wifiStatusIcon').style.background = '#ff5c5c';
+          document.getElementById('wifiStatusIcon').style.boxShadow = '0 0 12px rgba(255, 92, 92, 0.8)';
+          console.error('Erro ao buscar status do Wi-Fi:', err);
+        });
+    }
+
+    function updateWifiForm() {
+      const staEnabled = document.getElementById('staEnabled').checked;
+      document.getElementById('wifi-sta-form').style.display = staEnabled ? 'block' : 'none';
+    }
+
+    function scanWifi() {
+      const scanBtn = document.getElementById('scanWifiBtn');
+      const scanBtnIcon = document.getElementById('scanBtnIcon');
+      const scanBtnText = document.getElementById('scanBtnText');
+      const ssidSelect = document.getElementById('wifi-ssid');
+      
+      scanBtn.disabled = true;
+      scanBtnIcon.textContent = '⏳';
+      scanBtnText.textContent = 'Procurando...';
+      ssidSelect.innerHTML = '<option value="">Aguarde...</option>';
+
+      fetch('/api/wifi/scan')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Falha ao escanear redes.');
+          }
+          return response.json();
+        })
+        .then(networks => {
+          ssidSelect.innerHTML = '<option value="">Selecione uma rede</option>';
+          networks.sort((a, b) => b.rssi - a.rssi);
+          
+          if (networks.length === 0) {
+            ssidSelect.innerHTML = '<option value="">Nenhuma rede encontrada</option>';
+          } else {
+            networks.forEach(net => {
+              const signalStrength = net.rssi > -50 ? '📶 Excelente' : net.rssi > -70 ? '📶 Bom' : '📶 Fraco';
+              const label = `${net.ssid} (${signalStrength})`;
+              const option = new Option(label, net.ssid);
+              ssidSelect.add(option);
+            });
+          }
+          
+          scanBtn.disabled = false;
+          scanBtnIcon.textContent = '✓';
+          scanBtnText.textContent = `${networks.length} redes encontradas`;
+          
+          setTimeout(() => {
+            scanBtnIcon.textContent = '📡';
+            scanBtnText.textContent = 'Procurar Redes Wi-Fi';
+          }, 3000);
+        })
+        .catch(err => {
+          console.error('Erro ao escanear redes Wi-Fi:', err);
+          ssidSelect.innerHTML = '<option value="">Falha ao escanear</option>';
+          scanBtn.disabled = false;
+          scanBtnIcon.textContent = '❌';
+          scanBtnText.textContent = 'Erro ao escanear';
+          
+          setTimeout(() => {
+            scanBtnIcon.textContent = '📡';
+            scanBtnText.textContent = 'Procurar Redes Wi-Fi';
+          }, 3000);
+        });
+    }
+
+    function connectToWifi() {
+      const statusDiv = document.getElementById('wifi-connect-status');
+      const payload = {
+        enabled: document.getElementById('staEnabled').checked,
+        ssid: document.getElementById('wifi-ssid').value,
+        password: document.getElementById('wifi-password').value
+      };
+
+      if (payload.enabled && !payload.ssid) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = 'rgba(255, 92, 92, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 92, 92, 0.3)';
+        statusDiv.style.color = '#ff5c5c';
+        statusDiv.textContent = '⚠️ Por favor, selecione uma rede.';
+        return;
+      }
+
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = 'rgba(57, 160, 255, 0.1)';
+      statusDiv.style.border = '1px solid rgba(57, 160, 255, 0.3)';
+      statusDiv.style.color = 'var(--accent)';
+      statusDiv.textContent = '⏳ Salvando configurações e reiniciando... Por favor, aguarde.';
+
+      fetch('/api/wifi/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          statusDiv.style.background = 'rgba(76, 175, 80, 0.1)';
+          statusDiv.style.border = '1px solid rgba(76, 175, 80, 0.3)';
+          statusDiv.style.color = 'var(--success)';
+          statusDiv.textContent = '✓ ' + data.message;
+        } else {
+          statusDiv.style.background = 'rgba(255, 92, 92, 0.1)';
+          statusDiv.style.border = '1px solid rgba(255, 92, 92, 0.3)';
+          statusDiv.style.color = 'var(--danger)';
+          statusDiv.textContent = '❌ Erro: ' + data.message;
+        }
+      })
+      .catch(err => {
+        statusDiv.style.background = 'rgba(255, 92, 92, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 92, 92, 0.3)';
+        statusDiv.style.color = 'var(--danger)';
+        statusDiv.textContent = '❌ Erro de comunicação ao tentar conectar.';
+        console.error('Erro ao conectar ao Wi-Fi:', err);
+      });
+    }
+
+    function forgetWifiNetwork() {
+      if (!confirm('Tem certeza que deseja esquecer a rede Wi-Fi configurada? O dispositivo será reiniciado em modo AP.')) {
+        return;
+      }
+      
+      const statusDiv = document.getElementById('wifi-connect-status');
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = 'rgba(255, 165, 0, 0.1)';
+      statusDiv.style.border = '1px solid rgba(255, 165, 0, 0.3)';
+      statusDiv.style.color = '#ffa500';
+      statusDiv.textContent = '⏳ Removendo configurações WiFi...';
+
+      fetch('/api/wifi/forget', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          statusDiv.style.background = 'rgba(76, 175, 80, 0.1)';
+          statusDiv.style.border = '1px solid rgba(76, 175, 80, 0.3)';
+          statusDiv.style.color = 'var(--success)';
+          statusDiv.textContent = '✓ Rede esquecida! Reiniciando...';
+          
+          // Limpa os campos
+          document.getElementById('wifi-ssid').value = '';
+          document.getElementById('wifi-password').value = '';
+          document.getElementById('staEnabled').checked = false;
+          updateWifiForm();
+        } else {
+          statusDiv.style.background = 'rgba(255, 92, 92, 0.1)';
+          statusDiv.style.border = '1px solid rgba(255, 92, 92, 0.3)';
+          statusDiv.style.color = 'var(--danger)';
+          statusDiv.textContent = '❌ Erro: ' + data.message;
+        }
+      })
+      .catch(err => {
+        statusDiv.style.background = 'rgba(255, 92, 92, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 92, 92, 0.3)';
+        statusDiv.style.color = 'var(--danger)';
+        statusDiv.textContent = '❌ Erro de comunicação.';
+        console.error('Erro ao esquecer rede WiFi:', err);
+      });
+    }
+
+
+    window.addEventListener('load', () => {
+      initializeBoardSelectCustom();
+      tryFetchSystemInfo();
+      updateTelaOrientacaoButton();
+      setupResetButton();
+      updateWifiStatus(); // Adicionado para carregar o status do Wi-Fi
+    });
+
+    function initializeBoardSelectCustom() {
+      const sel = document.getElementById('board-select');
+      const trigger = document.getElementById('boardSelectDisplay');
+      const panel = document.getElementById('boardOptionsPanel');
+      if (!sel || !trigger || !panel) return;
+
+      function populateOptions() {
+        panel.innerHTML = '';
+        Array.from(sel.options).forEach(opt => {
+          const optDiv = document.createElement('div');
+          optDiv.className = 'custom-option';
+          optDiv.dataset.value = opt.value;
+          optDiv.textContent = opt.text;
+
+          const check = document.createElement('span');
+          check.className = 'check';
+          optDiv.appendChild(check);
+
+          if (opt.selected) {
+            optDiv.classList.add('selected');
+          }
+
+          optDiv.addEventListener('click', e => {
+            e.stopPropagation();
+            sel.value = opt.value;
+            panel.querySelectorAll('.custom-option').forEach(c => c.classList.remove('selected'));
+            optDiv.classList.add('selected');
+            updateTrigger();
+            panel.classList.remove('show');
+
+            const event = new Event('change', { bubbles: true });
+            sel.dispatchEvent(event);
+          });
+
+          panel.appendChild(optDiv);
+        });
+      }
+
+      function updateTrigger() {
+        const selectedOption = sel.options[sel.selectedIndex];
+        const labelSpan = trigger.querySelector('.label');
+        if (labelSpan) {
+          labelSpan.textContent = selectedOption ? selectedOption.text : 'Selecione a placa';
+        }
+      }
+
+      trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const isOpen = panel.classList.contains('show');
+        document.querySelectorAll('.custom-options-panel.show').forEach(p => p.classList.remove('show'));
+        if (!isOpen) panel.classList.add('show');
+      });
+
+      document.addEventListener('click', e => {
+        if (!trigger.contains(e.target) && !panel.contains(e.target)) {
+          panel.classList.remove('show');
+        }
+      });
+
+      sel.addEventListener('change', () => {
+        populateOptions();
+        updateTrigger();
+      });
+
+      populateOptions();
+      updateTrigger();
+    }
+
+    async function saveAndRestart() {
+      const sel = document.getElementById('board-select');
+      const board = sel ? sel.value : '';
+      const invEl = document.getElementById('invertTela');
+      const invert = (invEl && invEl.value === '1') ? '1' : '0';
+      const saveBtn = document.querySelector('.btn-salvar');
+      const statusEl = document.getElementById('resetStatusMessage');
+      const url = '/savesystem?board=' + encodeURIComponent(board) + '&invert=' + invert;
+
+      if (statusEl) {
+        statusEl.textContent = 'Salvando configurações da placa...';
+        statusEl.style.color = 'orange';
+      }
+      if (saveBtn) saveBtn.disabled = true;
+
+      try {
+        const response = await fetch(url, { method: 'GET', cache: 'no-store' });
+        const raw = await response.text();
+        let payload = null;
+        try { payload = raw ? JSON.parse(raw) : null; } catch (_) {}
+
+        if (!response.ok) {
+          throw new Error((payload && payload.message) ? payload.message : ('HTTP ' + response.status));
+        }
+        if (payload && payload.success === false) {
+          throw new Error(payload.message || 'Falha ao salvar configuracoes da placa.');
+        }
+
+        if (statusEl) {
+          statusEl.textContent = (payload && payload.message) ? payload.message : 'Placa salva. Reiniciando...';
+          statusEl.style.color = 'var(--success)';
+        }
+
+        // Atualiza estado local apos o comando de save/restart.
+        setTimeout(() => {
+          try { tryFetchSystemInfo(); } catch (_) {}
+          try { updateTelaOrientacaoButton(); } catch (_) {}
+        }, 900);
+      } catch (err) {
+        const msg = (err && err.message) ? err.message : 'Erro desconhecido';
+        console.error('saveAndRestart error:', err);
+        if (statusEl) {
+          statusEl.textContent = 'Erro ao salvar placa: ' + msg;
+          statusEl.style.color = 'var(--danger)';
+        }
+      } finally {
+        if (saveBtn) saveBtn.disabled = false;
+      }
+    }
+
+    async function uploadBackup() {
+      const fileInput = document.getElementById('backupFile');
+      const restoreMessage = document.getElementById('restoreMessage');
+      const progress = document.getElementById('restoreProgress');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const banner = document.getElementById('restoreBanner');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        restoreMessage.style.color = 'var(--danger)';
+        restoreMessage.innerText = 'Por favor, selecione um arquivo de backup.';
+        return;
+      }
+
+      const isJsonExt = file.name && file.name.toLowerCase().endsWith('.json');
+      if (!isJsonExt) {
+        restoreMessage.style.color = 'var(--danger)';
+        restoreMessage.innerText = 'Formato inválido. Selecione .json';
+        return;
+      }
+
+      progress.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressText.innerText = 'Lendo arquivo...';
+      restoreMessage.innerText = '';
+      banner.style.display = 'none';
+
+      try {
+        const text = await file.text();
+        const backup = JSON.parse(sanitizeJsonString(text));
+
+        // Detecta se o backup precisa de migracao de indices de cores
+        // Backups de V9.x ou V10 r1-r5 tinham PRETO no indice 9, agora e 14
+        let needsColorMigration = false;
+        const backupVersion = backup.firmware_version || '';
+        const verLower = backupVersion.toLowerCase();
+        if (verLower.includes('v9') || verLower.includes('-v9')) {
+          needsColorMigration = true;
+        } else if (verLower.includes('v10')) {
+          const rMatch = verLower.match(/ r(\d+)/);
+          if (!rMatch) {
+            needsColorMigration = true; // V10 sem revisao
+          } else {
+            const revNum = parseInt(rMatch[1], 10);
+            if (revNum < 6) needsColorMigration = true;
+          }
+        } else if (!backupVersion) {
+          needsColorMigration = true; // Versao desconhecida
+        }
+        if (needsColorMigration) {
+          console.log('[RESTORE] Backup antigo detectado, migracao de cores sera aplicada');
+        }
+
+        // Calcular total de passos para a barra de progresso
+        let totalSteps = 1; // config global
+        if (backup.board_config) totalSteps++;
+        if (backup.wifi_config && backup.wifi_config.sta_enabled) totalSteps++;
+        totalSteps += (backup.presets ? backup.presets.length : 0);
+        totalSteps += (backup.presets_layer2 ? backup.presets_layer2.length : 0);
+        let currentStep = 0;
+
+        function updateProgress(msg) {
+          currentStep++;
+          const pct = Math.round((currentStep / totalSteps) * 100);
+          progressBar.style.width = pct + '%';
+          progressText.innerText = msg + ' (' + pct + '%)';
+        }
+
+        // 1. Restaurar config global
+        if (backup.global_config) {
+          progressText.innerText = 'Restaurando config global...';
+          const res = await fetch('/api/global-config/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(backup.global_config)
+          });
+          if (!res.ok) throw new Error('Falha ao restaurar config global: ' + res.status);
+          updateProgress('Config global restaurada');
+          await new Promise(r => setTimeout(r, 50));
+        }
+
+        // 2. Restaurar config de placa (board_name e invert_tela)
+        if (backup.board_config) {
+          progressText.innerText = 'Restaurando config de placa...';
+          const boardName = backup.board_config.board_name || 'default';
+          const invertTela = backup.board_config.invert_tela ? '1' : '0';
+          const url = '/savesystem?board=' + encodeURIComponent(boardName) + '&invert=' + invertTela + '&norestart=1';
+          try {
+            await fetch(url);
+          } catch (e) {
+            console.warn('Aviso: config de placa pode nao ter sido salva:', e);
+          }
+          updateProgress('Config de placa restaurada');
+          await new Promise(r => setTimeout(r, 50));
+        }
+
+        // 3. Restaurar presets layer 1
+        if (backup.presets && backup.presets.length > 0) {
+          const NUM_PRESET_COLUMNS = 6;
+          const NUM_PRESET_ROWS = 5;
+          for (let i = 0; i < backup.presets.length; i++) {
+            const preset = backup.presets[i];
+            const col = Math.floor(i / NUM_PRESET_ROWS);
+            const row = i % NUM_PRESET_ROWS;
+            if (col >= NUM_PRESET_COLUMNS) continue;
+
+            const url = '/save-single-preset-data?btn=' + col + '&lvl=' + row + '&layer=1' + (needsColorMigration ? '&migrate=1' : '');
+            let success = false;
+            let retries = 0;
+            while (!success && retries < 3) {
+              try {
+                const res = await fetch(url, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(preset)
+                });
+                if (res.ok || res.status === 202) {
+                  success = true;
+                } else if (res.status === 503) {
+                  retries++;
+                  await new Promise(r => setTimeout(r, 500));
+                } else {
+                  throw new Error('HTTP ' + res.status);
+                }
+              } catch (e) {
+                retries++;
+                if (retries >= 3) throw new Error('Falha preset L1 [' + col + ',' + row + ']: ' + e.message);
+                await new Promise(r => setTimeout(r, 300));
+              }
+            }
+            updateProgress('Preset L1 ' + (i + 1) + '/' + backup.presets.length);
+            await new Promise(r => setTimeout(r, 30));
+          }
+        }
+
+        // 4. Restaurar presets layer 2
+        if (backup.presets_layer2 && backup.presets_layer2.length > 0) {
+          const NUM_PRESET_COLUMNS = 6;
+          const NUM_PRESET_ROWS = 5;
+          for (let i = 0; i < backup.presets_layer2.length; i++) {
+            const preset = backup.presets_layer2[i];
+            const col = Math.floor(i / NUM_PRESET_ROWS);
+            const row = i % NUM_PRESET_ROWS;
+            if (col >= NUM_PRESET_COLUMNS) continue;
+
+            const url = '/save-single-preset-data?btn=' + col + '&lvl=' + row + '&layer=2' + (needsColorMigration ? '&migrate=1' : '');
+            let success = false;
+            let retries = 0;
+            while (!success && retries < 3) {
+              try {
+                const res = await fetch(url, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(preset)
+                });
+                if (res.ok || res.status === 202) {
+                  success = true;
+                } else if (res.status === 503) {
+                  retries++;
+                  await new Promise(r => setTimeout(r, 500));
+                } else {
+                  throw new Error('HTTP ' + res.status);
+                }
+              } catch (e) {
+                retries++;
+                if (retries >= 3) throw new Error('Falha preset L2 [' + col + ',' + row + ']: ' + e.message);
+                await new Promise(r => setTimeout(r, 300));
+              }
+            }
+            updateProgress('Preset L2 ' + (i + 1) + '/' + backup.presets_layer2.length);
+            await new Promise(r => setTimeout(r, 30));
+          }
+        }
+
+        // 5. Restaurar config WiFi por ultimo (causa reinicio do ESP32)
+        if (backup.wifi_config && backup.wifi_config.sta_enabled && backup.wifi_config.sta_ssid) {
+          progressText.innerText = 'Restaurando config WiFi (dispositivo ira reiniciar)...';
+          try {
+            const wifiPayload = {
+              enabled: backup.wifi_config.sta_enabled,
+              ssid: backup.wifi_config.sta_ssid,
+              password: backup.wifi_config.sta_password || ''
+            };
+            await fetch('/api/wifi/connect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(wifiPayload)
+            });
+            updateProgress('Config WiFi restaurada - Reiniciando...');
+            // Dispositivo vai reiniciar, mostra mensagem de sucesso
+            progress.style.display = 'none';
+            banner.innerText = 'Backup restaurado com sucesso! Dispositivo reiniciando...';
+            banner.style.display = 'block';
+            return; // Sai da funcao pois o ESP vai reiniciar
+          } catch (e) {
+            // Se falhou, pode ser que o dispositivo ja reiniciou
+            console.warn('Config WiFi pode ter causado reinicio:', e);
+            progress.style.display = 'none';
+            banner.innerText = 'Backup restaurado! Dispositivo pode estar reiniciando...';
+            banner.style.display = 'block';
+            return;
+          }
+        }
+
+        // Se backup antigo foi detectado, executa migracao de cores automaticamente
+        // para garantir que todos os indices de cores estejam corretos
+        if (needsColorMigration) {
+          updateProgress('Migrando cores...');
+          try {
+            await fetch('/api/presets/migrate-colors', { method: 'POST' });
+            console.log('[RESTORE] Migracao de cores executada automaticamente');
+          } catch (e) {
+            console.warn('[RESTORE] Aviso: migracao de cores pode ter falhado:', e);
+          }
+        }
+
+        progress.style.display = 'none';
+        banner.innerText = 'Backup restaurado com sucesso! Reinicie o dispositivo para aplicar todas as configuracoes.';
+        banner.style.display = 'block';
+
+      } catch (err) {
+        progress.style.display = 'none';
+        restoreMessage.style.color = 'var(--danger)';
+        restoreMessage.innerText = 'Erro: ' + err.message;
+        console.error('Erro no restore:', err);
+      }
+    }
+
+    function onBoardChange(v) {
+      console.log('Board selected:', v);
+    }
+
+    function downloadLogs() {
+      window.location.href = '/api/logs';
+    }
+
+    // Sanitiza JSON removendo caracteres de controle invalidos em strings
+    function sanitizeJsonString(jsonStr) {
+      // Remove caracteres de controle (0x00-0x1F) exceto \t \n \r que sao validos em JSON
+      // Tambem remove 0x7F (DEL) e caracteres invalidos
+      return jsonStr.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+    }
+
+    async function fetchJsonSanitized(url) {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('HTTP ' + response.status);
+      }
+      const text = await response.text();
+      const sanitized = sanitizeJsonString(text);
+      return JSON.parse(sanitized);
+    }
+
+    async function downloadBackupClientSide() {
+      const btn = document.getElementById('btnBackupClient');
+      const progressContainer = document.getElementById('backupProgressContainer');
+      const progressBar = document.getElementById('backupProgressBar');
+      const progressText = document.getElementById('backupProgressText');
+      const backupMessage = document.getElementById('backupMessage');
+      const backupBanner = document.getElementById('backupBanner');
+
+      if (btn) { btn.disabled = true; btn.textContent = 'Gerando...'; }
+      if (progressContainer) { progressContainer.style.display = 'block'; }
+      if (progressBar) { progressBar.style.width = '0%'; }
+      if (backupMessage) { backupMessage.innerText = ''; }
+      if (backupBanner) { backupBanner.style.display = 'none'; }
+
+      // Calcular total de passos: 4 configs + 60 presets (30 L1 + 30 L2)
+      const NUM_PRESET_COLUMNS = 6;
+      const NUM_PRESET_ROWS = 5;
+      const totalPresets = NUM_PRESET_COLUMNS * NUM_PRESET_ROWS * 2;
+      const totalSteps = 4 + totalPresets; // 4 configs + presets
+      let currentStep = 0;
+
+      function updateProgress(msg) {
+        currentStep++;
+        const pct = Math.round((currentStep / totalSteps) * 100);
+        if (progressBar) { progressBar.style.width = pct + '%'; }
+        if (progressText) { progressText.innerText = msg + ' (' + pct + '%)'; }
+      }
+
+      try {
+        // 1. Info do sistema
+        if (progressText) { progressText.innerText = 'Coletando info do sistema...'; }
+        const sysInfo = await fetchJsonSanitized('/api/system/info');
+        const firmwareVersion = (sysInfo && sysInfo.firmwareVersion) ? sysInfo.firmwareVersion : 'UNKNOWN';
+        updateProgress('Info do sistema coletada');
+
+        // 2. Config global
+        const globalConfig = await fetchJsonSanitized('/api/global-config/read');
+        updateProgress('Config global coletada');
+
+        // 3. Config de placa
+        const boardSelect = document.getElementById('board-select');
+        const invertTelaEl = document.getElementById('invertTela');
+        const boardConfig = {
+          board_name: boardSelect ? boardSelect.value : (globalConfig.boardName || 'default'),
+          invert_tela: invertTelaEl ? (invertTelaEl.value === '1') : false
+        };
+        updateProgress('Config de placa coletada');
+
+        // 4. Config WiFi
+        let wifiConfig = null;
+        try {
+          const wifiStatus = await fetchJsonSanitized('/api/wifi/status');
+          wifiConfig = {
+            sta_enabled: wifiStatus.sta_enabled || false,
+            sta_ssid: wifiStatus.sta_ssid || '',
+            sta_password: wifiStatus.sta_password || ''
+          };
+        } catch (e) {
+          console.warn('Nao foi possivel obter config WiFi:', e);
+        }
+        updateProgress('Config WiFi coletada');
+
+        // 5. Coletar presets
+        const presets = [];
+        const presetsLayer2 = [];
+        const maxRetries = 3;
+
+        for (let col = 0; col < NUM_PRESET_COLUMNS; col++) {
+          for (let row = 0; row < NUM_PRESET_ROWS; row++) {
+            // Layer 1
+            const urlL1 = '/get-single-preset-data?btn=' + col + '&lvl=' + row + '&layer=1';
+            let p1 = null;
+            let retryCount = 0;
+            while (retryCount < maxRetries) {
+              try {
+                p1 = await fetchJsonSanitized(urlL1);
+                break;
+              } catch (e) {
+                if (e.message.includes('503')) {
+                  retryCount++;
+                  if (progressText) { progressText.innerText = 'Memoria baixa, aguardando... (' + retryCount + '/' + maxRetries + ')'; }
+                  await new Promise(res => setTimeout(res, 500));
+                } else {
+                  throw e;
+                }
+              }
+            }
+            if (!p1) throw new Error('Falha apos ' + maxRetries + ' tentativas para L1 btn=' + col + ' lvl=' + row);
+            presets.push(p1);
+            updateProgress('Preset L1 [' + (col+1) + ',' + String.fromCharCode(65+row) + ']');
+
+            // Layer 2
+            const urlL2 = '/get-single-preset-data?btn=' + col + '&lvl=' + row + '&layer=2';
+            let p2 = null;
+            retryCount = 0;
+            while (retryCount < maxRetries) {
+              try {
+                p2 = await fetchJsonSanitized(urlL2);
+                break;
+              } catch (e) {
+                if (e.message.includes('503')) {
+                  retryCount++;
+                  if (progressText) { progressText.innerText = 'Memoria baixa, aguardando... (' + retryCount + '/' + maxRetries + ')'; }
+                  await new Promise(res => setTimeout(res, 500));
+                } else {
+                  throw e;
+                }
+              }
+            }
+            if (!p2) throw new Error('Falha apos ' + maxRetries + ' tentativas para L2 btn=' + col + ' lvl=' + row);
+            presetsLayer2.push(p2);
+            updateProgress('Preset L2 [' + (col+1) + ',' + String.fromCharCode(65+row) + ']');
+            await new Promise(res => setTimeout(res, 20));
+          }
+        }
+
+        // 6. Gerar arquivo
+        if (progressText) { progressText.innerText = 'Gerando arquivo...'; }
+        if (progressBar) { progressBar.style.width = '100%'; }
+
+        const backup = {
+          firmware_version: firmwareVersion,
+          backup_date: new Date().toISOString(),
+          global_config: globalConfig,
+          board_config: boardConfig,
+          wifi_config: wifiConfig,
+          presets: presets,
+          presets_layer2: presetsLayer2
+        };
+
+        const text = JSON.stringify(backup);
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'bfmidi_backup.json';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+          URL.revokeObjectURL(url);
+          a.remove();
+        }, 500);
+
+        // Sucesso
+        if (progressContainer) { progressContainer.style.display = 'none'; }
+        if (backupBanner) {
+          backupBanner.innerText = 'Backup gerado com sucesso!';
+          backupBanner.style.display = 'block';
+          setTimeout(function() { backupBanner.style.display = 'none'; }, 3000);
+        }
+
+      } catch (err) {
+        if (progressContainer) { progressContainer.style.display = 'none'; }
+        if (backupMessage) {
+          backupMessage.style.color = 'var(--danger)';
+          backupMessage.innerText = 'Erro: ' + (err && err.message ? err.message : err);
+        }
+        console.error('Erro no backup:', err);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Download Backup';
+        }
+      }
+    }
+
+    // ========================================
+    // HARDWARE TEST FUNCTIONS
+    // ========================================
+    let hardwareTestRunning = false;
+    let hardwareTestInterval = null;
+
+    function startHardwareTest(testType) {
+      if (hardwareTestRunning) {
+        return;
+      }
+
+      const progressContainer = document.getElementById('testProgressContainer');
+      const progressBar = document.getElementById('testProgressBar');
+      const progressText = document.getElementById('testProgressText');
+      const resultMessage = document.getElementById('testResultMessage');
+      const btnLeds = document.getElementById('btnTestLeds');
+      const btnDisplay = document.getElementById('btnTestDisplay');
+      const btnMidi = document.getElementById('btnTestMidi');
+
+      // Disable all buttons
+      btnLeds.disabled = true;
+      btnDisplay.disabled = true;
+      btnMidi.disabled = true;
+      hardwareTestRunning = true;
+
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      resultMessage.innerText = '';
+
+      if (testType === 'leds') {
+        runLedTest(progressBar, progressText, resultMessage, () => {
+          finishTest(btnLeds, btnDisplay, btnMidi, progressContainer);
+        });
+      } else if (testType === 'display') {
+        runDisplayTest(progressBar, progressText, resultMessage, () => {
+          finishTest(btnLeds, btnDisplay, btnMidi, progressContainer);
+        });
+      } else if (testType === 'midi') {
+        runMidiTest(progressBar, progressText, resultMessage, () => {
+          finishTest(btnLeds, btnDisplay, btnMidi, progressContainer);
+        });
+      }
+    }
+
+    function finishTest(btnLeds, btnDisplay, btnMidi, progressContainer) {
+      hardwareTestRunning = false;
+      btnLeds.disabled = false;
+      btnDisplay.disabled = false;
+      btnMidi.disabled = false;
+      setTimeout(() => {
+        progressContainer.style.display = 'none';
+      }, 2000);
+    }
+
+    // LED Test - 20 seconds cycling colors and intensity
+    function runLedTest(progressBar, progressText, resultMessage, onComplete) {
+      const totalDuration = 20000; // 20 seconds
+      const updateInterval = 500; // Update every 500ms
+      let elapsed = 0;
+      let step = 0;
+
+      progressText.innerText = 'Testando LEDs...';
+      resultMessage.style.color = '#ffa500';
+      resultMessage.innerText = 'Iniciando teste de LEDs (20 segundos)';
+
+      // Start the test on the device
+      fetch('/api/hardware-test/leds/start', { method: 'POST' })
+        .catch(err => console.warn('LED test start:', err));
+
+      hardwareTestInterval = setInterval(() => {
+        elapsed += updateInterval;
+        step++;
+        const progress = Math.min((elapsed / totalDuration) * 100, 100);
+        progressBar.style.width = progress + '%';
+
+        const phase = step % 8;
+        const phases = [
+          'Vermelho', 'Verde', 'Azul', 'Amarelo',
+          'Roxo', 'Ciano', 'Branco', 'Rainbow'
+        ];
+        progressText.innerText = 'Testando LEDs: ' + phases[phase] + ' (' + Math.round(progress) + '%)';
+
+        if (elapsed >= totalDuration) {
+          clearInterval(hardwareTestInterval);
+          hardwareTestInterval = null;
+
+          // Stop the test
+          fetch('/api/hardware-test/leds/stop', { method: 'POST' })
+            .catch(err => console.warn('LED test stop:', err));
+
+          progressBar.style.width = '100%';
+          progressText.innerText = 'Teste de LEDs concluído!';
+          resultMessage.style.color = 'var(--success)';
+          resultMessage.innerText = '✓ Teste de LEDs finalizado com sucesso';
+          onComplete();
+        }
+      }, updateInterval);
+    }
+
+    // Display Test - 20 seconds with color bars and patterns
+    function runDisplayTest(progressBar, progressText, resultMessage, onComplete) {
+      const totalDuration = 20000; // 20 seconds
+      const updateInterval = 500;
+      let elapsed = 0;
+      let step = 0;
+
+      progressText.innerText = 'Testando Display...';
+      resultMessage.style.color = '#4ecdc4';
+      resultMessage.innerText = 'Iniciando teste de Display (20 segundos)';
+
+      // Start the test on the device
+      fetch('/api/hardware-test/display/start', { method: 'POST' })
+        .catch(err => console.warn('Display test start:', err));
+
+      hardwareTestInterval = setInterval(() => {
+        elapsed += updateInterval;
+        step++;
+        const progress = Math.min((elapsed / totalDuration) * 100, 100);
+        progressBar.style.width = progress + '%';
+        progressBar.style.background = 'linear-gradient(90deg, #4ecdc4, #45b7aa)';
+
+        const phase = step % 10;
+        const phases = [
+          'Vermelho', 'Verde', 'Azul', 'Branco', 'Preto',
+          'Color Bars', 'Gradiente', 'Checkerboard', 'Linhas', 'Info'
+        ];
+        progressText.innerText = 'Testando Display: ' + phases[phase] + ' (' + Math.round(progress) + '%)';
+
+        if (elapsed >= totalDuration) {
+          clearInterval(hardwareTestInterval);
+          hardwareTestInterval = null;
+
+          // Stop the test
+          fetch('/api/hardware-test/display/stop', { method: 'POST' })
+            .catch(err => console.warn('Display test stop:', err));
+
+          progressBar.style.width = '100%';
+          progressText.innerText = 'Teste de Display concluído!';
+          resultMessage.style.color = 'var(--success)';
+          resultMessage.innerText = '✓ Teste de Display finalizado com sucesso';
+          onComplete();
+        }
+      }, updateInterval);
+    }
+
+    // MIDI Test - Send PC 1 to PC 20, one per second
+    function runMidiTest(progressBar, progressText, resultMessage, onComplete) {
+      const totalPCs = 20;
+      let currentPC = 1;
+
+      progressText.innerText = 'Testando MIDI...';
+      resultMessage.style.color = '#a855f7';
+      resultMessage.innerText = 'Enviando Program Changes (PC 1-20)';
+      progressBar.style.background = 'linear-gradient(90deg, #a855f7, #9333ea)';
+
+      function sendNextPC() {
+        if (currentPC > totalPCs) {
+          clearInterval(hardwareTestInterval);
+          hardwareTestInterval = null;
+
+          progressBar.style.width = '100%';
+          progressText.innerText = 'Teste MIDI concluído!';
+          resultMessage.style.color = 'var(--success)';
+          resultMessage.innerText = '✓ Enviados PC 1 até PC 20 com sucesso';
+          onComplete();
+          return;
+        }
+
+        const progress = (currentPC / totalPCs) * 100;
+        progressBar.style.width = progress + '%';
+        progressText.innerText = 'Enviando PC ' + currentPC + ' de ' + totalPCs + ' (' + Math.round(progress) + '%)';
+
+        // Send MIDI PC via API
+        fetch('/api/hardware-test/midi/pc?pc=' + currentPC, { method: 'POST' })
+          .then(response => {
+            if (response.ok) {
+              resultMessage.innerText = '🎹 PC ' + currentPC + ' enviado';
+            }
+          })
+          .catch(err => {
+            console.warn('MIDI PC ' + currentPC + ' error:', err);
+            resultMessage.innerText = '⚠️ Erro ao enviar PC ' + currentPC;
+          });
+
+        currentPC++;
+      }
+
+      // Send first PC immediately
+      sendNextPC();
+
+      // Then send one per second
+      hardwareTestInterval = setInterval(sendNextPC, 1000);
+    }
+  </script>
+</body>
+</html>
