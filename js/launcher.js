@@ -2,7 +2,7 @@
 import { ParityBridgeHost } from "./parity-bridge-host.js";
 
 if (window.parent && window.parent !== window) {
-  window.location.replace("/main/");
+  window.location.replace("./main/");
 }
 
 
@@ -75,14 +75,14 @@ function reloadEditorFrameAfterConnect() {
 
   const hasSource = Boolean(editorFrameEl.src) && editorFrameEl.src !== "about:blank";
   if (!hasSource) {
-    editorFrameEl.src = "/main/";
+    editorFrameEl.src = "./main/";
     return;
   }
 
   try {
     editorFrameEl.contentWindow?.location.reload();
   } catch {
-    editorFrameEl.src = "/main/";
+    editorFrameEl.src = "./main/";
   }
 }
 
@@ -167,7 +167,7 @@ setStatus("disconnected", "Aguardando conexao.");
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
       // noop
     });
   });

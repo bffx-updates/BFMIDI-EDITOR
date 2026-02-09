@@ -294,7 +294,7 @@
       to{opacity:1;transform:translateY(0);}
     }
   </style>
-  <script src="/js/parity-bridge-client.js"></script>
+  <script src="../js/parity-bridge-client.js"></script>
 </head>
 <body>
   <div class="page">
@@ -384,13 +384,13 @@
 
   <script>
     document.getElementById('btnPresetConfig').addEventListener('click', function() {
-      window.location.href = '/preset-config';
+      window.location.href = '../preset-config/';
     });
     document.getElementById('btnGlobalConfig').addEventListener('click', function() {
-      window.location.href = '/global-config';
+      window.location.href = '../global-config/';
     });
     document.getElementById('btnSystem').addEventListener('click', function() {
-      window.location.href = '/system';
+      window.location.href = '../system/';
     });
 
     fetch('/api/system/info').then(r=>{
