@@ -1,0 +1,189 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1220" />
+  <title>BFMIDI Editor Externo</title>
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    :root {
+      --bg: #070910;
+      --muted: #9aa5b3;
+      --accent: #39a0ff;
+      --ok: #4caf50;
+      --warn: #ffb74d;
+      --error: #ff5c5c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(57, 160, 255, 0.16), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(124, 58, 237, 0.12), transparent 55%),
+        linear-gradient(180deg, #05060a 0%, #080b11 100%);
+      color: #e6eef6;
+    }
+
+    .editor-shell {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: auto minmax(220px, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(9, 14, 20, 0.97);
+      backdrop-filter: blur(10px);
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toolbar-center {
+      min-width: 0;
+      display: flex;
+      justify-content: center;
+    }
+
+    button {
+      border-radius: 10px;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      padding: 7px 12px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      cursor: pointer;
+      min-width: 126px;
+      transition: 0.15s ease;
+      white-space: nowrap;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: rgba(57, 160, 255, 0.12);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    #btnToolbarDisconnect {
+      border-color: #ff00aa;
+      color: #ff00aa;
+    }
+
+    #btnToolbarDisconnect:hover:not(:disabled) {
+      background: rgba(255, 0, 170, 0.12);
+    }
+
+    .status-chip {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: rgba(9, 14, 20, 0.95);
+      white-space: nowrap;
+    }
+
+    .status-chip[data-state="connected"] {
+      color: var(--ok);
+      border-color: rgba(76, 175, 80, 0.55);
+    }
+
+    .status-chip[data-state="connecting"] {
+      color: var(--warn);
+      border-color: rgba(255, 183, 77, 0.55);
+    }
+
+    .status-chip[data-state="error"] {
+      color: var(--error);
+      border-color: rgba(255, 92, 92, 0.55);
+    }
+
+    .serial-monitor {
+      width: 100%;
+      max-width: 900px;
+      height: 54px;
+      margin: 0;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(5, 9, 16, 0.95);
+      color: #d7e7f5;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.35;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #05060a;
+    }
+
+    @media (max-width: 980px) {
+      .toolbar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .toolbar-left,
+      .toolbar-right,
+      .toolbar-center {
+        justify-content: center;
+      }
+
+      .serial-monitor {
+        max-width: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section id="editorShell" class="editor-shell">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button id="btnToolbarConnect" type="button">Conectar</button>
+        <div id="toolbarStatus" class="status-chip" data-state="disconnected">Desconectado</div>
+      </div>
+      <div class="toolbar-center">
+        <pre id="serialLogs" class="serial-monitor">[monitor] Abra o browser chooser e conecte o BFMIDI via USB.</pre>
+      </div>
+      <div class="toolbar-right">
+        <button id="btnToolbarDisconnect" type="button" disabled>Desconectar</button>
+      </div>
+    </div>
+    <iframe id="editorFrame" src="/main/" title="BFMIDI Editor"></iframe>
+  </section>
+
+  <script type="module" src="/js/launcher.js"></script>
+</body>
+</html>
