@@ -1389,7 +1389,6 @@
     <div class="floating-footer-bar">
       <div class="btn-container">
       <button type="button" class="btn btn-voltar" onclick="window.location.href='../'">Voltar</button>
-        <button type="submit" form="globalConfigForm" class="btn btn-salvar">Salvar</button>
       </div>
     </div>
   </div>
@@ -2079,25 +2078,20 @@
             });
         })();
 
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            statusMessage.textContent = 'Salvando...';
-            statusMessage.style.color = 'orange';
+        // Previne submit manual do form (agora tudo e auto-save)
+        form.addEventListener('submit', (event) => { event.preventDefault(); });
 
+        async function saveGlobalConfig() {
             const formData = new FormData(form);
-            updateSwGlobalDataFromUI(); // Garante que os dados da UI estao no objeto JS
+            updateSwGlobalDataFromUI();
             const dataToSave = {
                 ledBrilho: parseInt(ledBrilho),
                 ledPreview: document.getElementById('ledPreview').checked,
                 modoMidiIndex: modoMidiOptionsValues.indexOf(formData.get('modoMidi')),
-                // SHOW FX SCREEN legado (usado pelo firmware para tela/cadeia FX)
                 mostrarTelaFX: document.getElementById('mostrarTelaFX').checked,
-                // CADEIA segue o mesmo estado (para uso futuro se necessÃ¡rio)
                 mostrarCadeia: document.getElementById('mostrarCadeia').checked,
-                // SIGLA FX controla apenas exibiÃ§Ã£o das siglas FX na MAIN SCREEN (0=OFF, 1=PREVIEW, 2=LIVE MODE)
                 mostrarFxModo: parseInt(document.getElementById('mostrarFxModo').value),
                 mostrarFxQuando: parseInt(document.getElementById('mostrarFxQuando').value),
-
                 coresPresetConfig: selectedPresetColorsUint32,
                 corLiveModeConfig: selectedLiveModeColorUint32,
                 corLiveMode2Config: selectedLiveMode2ColorUint32,
@@ -2105,48 +2099,56 @@
                 backgroundEnabled: document.getElementById('bgColorEnabled') ? document.getElementById('bgColorEnabled').checked : false,
                 backgroundColorConfig: selectedBackgroundColorUint32,
                 selectModeIndex: parseInt(formData.get('selectModeIndex')),
-                swGlobal: swGlobalConfig, // Adiciona o objeto completo do SW Global
+                swGlobal: swGlobalConfig,
                 presetLevels: presetLevels,
-                // Novos campos LOCK
                 lockSetup: lockSetup,
                 lockGlobal: lockGlobal,
-                // LED Mode (LETRAS / NUMEROS)
                 ledModeNumeros: ledModeNumeros,
-                // INICIO AUTOMATICO
                 autoStartEnabled: document.getElementById('autoStartEnabled') ? document.getElementById('autoStartEnabled').checked : false,
                 autoStartRow: parseInt(document.getElementById('autoStartRow')?.value || 0),
                 autoStartCol: parseInt(document.getElementById('autoStartCol')?.value || 0),
                 autoStartLiveMode: document.getElementById('autoStartLiveMode') ? document.getElementById('autoStartLiveMode').checked : false
             };
 
-            fetch('/api/global-config/save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(dataToSave)
-            })
-            .then(response => response.json())
-            .then(result => {
+            try {
+                const response = await fetch('/api/global-config/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSave)
+                });
+                const result = await response.json();
                 if (result.success) {
-                    statusMessage.textContent = 'Configuracoes salvas com sucesso!';
-                    statusMessage.style.color = 'green';
-                    // show floating banner for 500ms
-                    setTimeout(() => {
-                        showSavedBanner();
-                    }, 100);
+                    showSavedBanner();
                 } else {
-                    statusMessage.textContent = 'Erro ao salvar: ' + (result.message || 'Erro desconhecido.');
-                    statusMessage.style.color = 'red';
+                    console.warn('Erro ao salvar global:', result.message);
                 }
-                setTimeout(() => { statusMessage.textContent = ''; }, 5000);
-            })
-            .catch(error => {
+            } catch (error) {
                 console.error('Erro ao salvar configuracoes:', error);
-                statusMessage.textContent = 'Erro de comunicacao ao salvar.';
-                statusMessage.style.color = 'red';
-                setTimeout(() => { statusMessage.textContent = ''; }, 5000);
-            });
+            }
+        }
+
+        // --- AUTO-SAVE debounced ---
+        let _globalAutoSaveTimer = null;
+        function scheduleGlobalAutoSave() {
+            if (_globalAutoSaveTimer) clearTimeout(_globalAutoSaveTimer);
+            _globalAutoSaveTimer = setTimeout(() => { _globalAutoSaveTimer = null; saveGlobalConfig(); }, 1000);
+        }
+
+        // Event delegation: qualquer alteracao de input/select/click dispara auto-save
+        const globalContent = document.querySelector('.grid') || document.body;
+        globalContent.addEventListener('change', (e) => {
+            const tag = e.target.tagName;
+            if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') scheduleGlobalAutoSave();
+        });
+        globalContent.addEventListener('input', (e) => {
+            const tag = e.target.tagName;
+            if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') scheduleGlobalAutoSave();
+        });
+        globalContent.addEventListener('click', (e) => {
+            // Ignora botoes de navegacao (Voltar)
+            if (e.target.closest('.btn-voltar, .floating-footer-bar')) return;
+            const el = e.target.closest('button, .toggle-button, .color-swatch, .swatch, .preset-level-box, .lock-btn, [data-action]');
+            if (el) scheduleGlobalAutoSave();
         });
 
         if (ledBrilhoButton) {

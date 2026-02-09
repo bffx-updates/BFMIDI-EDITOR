@@ -1070,7 +1070,6 @@
   <div class="floating-footer-bar">
     <div class="btn-container">
       <button type="button" class="btn btn-voltar" onclick="window.location.href='../'">Voltar</button>
-      <button type="button" class="btn btn-salvar" onclick="saveAndRestart()">Salvar</button>
     </div>
   </div>
 
@@ -1232,6 +1231,7 @@
       if (!invEl) return;
       invEl.value = (invEl.value === '1') ? '0' : '1';
       updateTelaOrientacaoButton();
+      scheduleSystemAutoSave();
     }
 
     function setupResetButton() {
@@ -1585,26 +1585,46 @@
       sel.addEventListener('change', () => {
         populateOptions();
         updateTrigger();
+        scheduleSystemAutoSave();
       });
 
       populateOptions();
       updateTrigger();
     }
 
-    async function saveAndRestart() {
+    function showSavedBanner() {
+      const bannerId = 'saveBanner';
+      let banner = document.getElementById(bannerId);
+      if (!banner) {
+        banner = document.createElement('div');
+        banner.id = bannerId;
+        banner.className = 'save-banner';
+        banner.setAttribute('aria-hidden', 'true');
+        banner.textContent = 'SALVO!';
+        Object.assign(banner.style, {
+          position: 'fixed', top: '12px', left: '50%', transform: 'translateX(-50%)',
+          background: '#27ae60', color: 'white', padding: '12px 24px', borderRadius: '4px',
+          zIndex: '10000', opacity: '0', transition: 'opacity 0.15s', pointerEvents: 'none',
+          display: 'none', fontSize: '1.5em', fontWeight: 'bold'
+        });
+        document.body.appendChild(banner);
+      }
+      banner.style.display = 'block';
+      banner.style.opacity = '1';
+      banner.setAttribute('aria-hidden', 'false');
+      setTimeout(() => {
+        banner.style.opacity = '0';
+        banner.setAttribute('aria-hidden', 'true');
+        setTimeout(() => { banner.style.display = 'none'; }, 150);
+      }, 500);
+    }
+
+    async function saveSystemConfig() {
       const sel = document.getElementById('board-select');
       const board = sel ? sel.value : '';
       const invEl = document.getElementById('invertTela');
       const invert = (invEl && invEl.value === '1') ? '1' : '0';
-      const saveBtn = document.querySelector('.btn-salvar');
-      const statusEl = document.getElementById('resetStatusMessage');
       const url = '/savesystem?board=' + encodeURIComponent(board) + '&invert=' + invert;
-
-      if (statusEl) {
-        statusEl.textContent = 'Salvando configurações da placa...';
-        statusEl.style.color = 'orange';
-      }
-      if (saveBtn) saveBtn.disabled = true;
 
       try {
         const response = await fetch(url, { method: 'GET', cache: 'no-store' });
@@ -1619,26 +1639,31 @@
           throw new Error(payload.message || 'Falha ao salvar configuracoes da placa.');
         }
 
-        if (statusEl) {
-          statusEl.textContent = (payload && payload.message) ? payload.message : 'Placa salva. Reiniciando...';
-          statusEl.style.color = 'var(--success)';
-        }
+        showSavedBanner();
 
-        // Atualiza estado local apos o comando de save/restart.
         setTimeout(() => {
           try { tryFetchSystemInfo(); } catch (_) {}
           try { updateTelaOrientacaoButton(); } catch (_) {}
         }, 900);
       } catch (err) {
-        const msg = (err && err.message) ? err.message : 'Erro desconhecido';
-        console.error('saveAndRestart error:', err);
+        console.error('saveSystemConfig error:', err);
+        const statusEl = document.getElementById('resetStatusMessage');
         if (statusEl) {
-          statusEl.textContent = 'Erro ao salvar placa: ' + msg;
+          statusEl.textContent = 'Erro ao salvar placa: ' + ((err && err.message) ? err.message : 'Erro desconhecido');
           statusEl.style.color = 'var(--danger)';
+          setTimeout(() => { statusEl.textContent = ''; }, 5000);
         }
-      } finally {
-        if (saveBtn) saveBtn.disabled = false;
       }
+    }
+
+    // Alias para compatibilidade (backup restore usa saveAndRestart)
+    async function saveAndRestart() { return saveSystemConfig(); }
+
+    // --- AUTO-SAVE debounced ---
+    let _systemAutoSaveTimer = null;
+    function scheduleSystemAutoSave() {
+      if (_systemAutoSaveTimer) clearTimeout(_systemAutoSaveTimer);
+      _systemAutoSaveTimer = setTimeout(() => { _systemAutoSaveTimer = null; saveSystemConfig(); }, 1000);
     }
 
     async function uploadBackup() {

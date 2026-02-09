@@ -166,6 +166,29 @@ export class BFMIDIProtocol extends EventTarget {
     }
   }
 
+  /**
+   * Drena dados pendentes no buffer serial por `ms` milissegundos.
+   * Util para limpar lixo acumulado antes de enviar o primeiro comando.
+   */
+  async drainReadBuffer(ms = 300) {
+    const before = this.readBuffer.length;
+    await new Promise((resolve) => window.setTimeout(resolve, ms));
+    const after = this.readBuffer.length;
+    const drained = after - before;
+
+    if (drained > 0 || before > 0) {
+      this.readBuffer = "";
+      this.dispatchEvent(
+        new CustomEvent("log", {
+          detail: {
+            type: "info",
+            message: `Buffer serial drenado (${before + drained} bytes descartados)`,
+          },
+        })
+      );
+    }
+  }
+
   receberResposta() {
     return new Promise((resolve) => {
       const handler = (event) => {

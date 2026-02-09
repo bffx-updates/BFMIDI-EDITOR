@@ -1,17 +1,28 @@
-﻿import { BFMIDIProtocol } from "./protocol.js";
+import { BFMIDIProtocol } from "./protocol.js";
 
 const SYSEX_ENTER_EDITOR = [0xf0, 0x7d, 0x42, 0x46, 0x01, 0xf7];
 const SYSEX_EXIT_EDITOR = [0xf0, 0x7d, 0x42, 0x46, 0x00, 0xf7];
 
+// Identificadores exatos do produto BFMIDI
+const BFMIDI_VID = 0x303a;
+const BFMIDI_PID = 0x80c2;
+
 const SERIAL_PORT_FILTERS = [
-  { usbVendorId: 0x303a }, // Espressif
-  { usbVendorId: 0x10c4 }, // Silicon Labs
-  { usbVendorId: 0x1a86 }, // QinHeng/CH34x
-  { usbVendorId: 0x0403 }, // FTDI
+  { usbVendorId: 0x303a }, // Espressif (ESP32-S2/S3 native USB) — inclui BFMIDI
+  { usbVendorId: 0x10c4 }, // Silicon Labs (CP210x)
+  { usbVendorId: 0x1a86 }, // QinHeng (CH340/CH341/CH343)
+  { usbVendorId: 0x0403 }, // FTDI (FT232/FT2232)
   { usbVendorId: 0x2341 }, // Arduino
+  { usbVendorId: 0x067b }, // Prolific (PL2303)
+  { usbVendorId: 0x04d8 }, // Microchip (MCP2200/MCP2221)
+  { usbVendorId: 0x2e8a }, // Raspberry Pi (RP2040 bridge boards)
+  { usbVendorId: 0x239a }, // Adafruit
+  { usbVendorId: 0x1915 }, // Nordic Semiconductor
 ];
 
-const KNOWN_ESP_VENDORS = new Set([0x303a, 0x10c4, 0x1a86, 0x0403, 0x2341]);
+const KNOWN_ESP_VENDORS = new Set(SERIAL_PORT_FILTERS.map((f) => f.usbVendorId));
+
+const STORAGE_KEY_PORT = "bfmidi_last_port";
 
 const delay = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
@@ -25,11 +36,55 @@ function formatUsbInfo(info = {}) {
   return `VID=${vid} PID=${pid}`;
 }
 
+function isBfmidiPort(info = {}) {
+  return info.usbVendorId === BFMIDI_VID && info.usbProductId === BFMIDI_PID;
+}
+
 function looksLikeEspPort(info = {}) {
   if (!Number.isInteger(info.usbVendorId)) {
     return false;
   }
   return KNOWN_ESP_VENDORS.has(info.usbVendorId);
+}
+
+function saveLastPortInfo(info) {
+  try {
+    if (info && Number.isInteger(info.usbVendorId)) {
+      localStorage.setItem(
+        STORAGE_KEY_PORT,
+        JSON.stringify({
+          vid: info.usbVendorId,
+          pid: info.usbProductId || 0,
+          ts: Date.now(),
+        })
+      );
+    }
+  } catch {
+    // localStorage pode estar indisponivel
+  }
+}
+
+function loadLastPortInfo() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PORT);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // Expira apos 90 dias
+    if (Date.now() - (parsed.ts || 0) > 90 * 24 * 3600 * 1000) {
+      localStorage.removeItem(STORAGE_KEY_PORT);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function portMatchesSaved(portInfo, saved) {
+  if (!saved || !portInfo) return false;
+  return (
+    portInfo.usbVendorId === saved.vid && portInfo.usbProductId === saved.pid
+  );
 }
 
 export class ConnectionManager extends EventTarget {
@@ -119,20 +174,64 @@ export class ConnectionManager extends EventTarget {
 
   async #requestSerialPortWithHeuristics() {
     const grantedPorts = await navigator.serial.getPorts();
+    const savedInfo = loadLastPortInfo();
 
     if (grantedPorts.length > 0) {
-      const preferredGranted = grantedPorts.find((port) =>
+      // 1. Prioridade absoluta: VID/PID exato do BFMIDI (0x303a:0x80c2)
+      const exactBfmidi = grantedPorts.find((port) =>
+        isBfmidiPort(port.getInfo?.() || {})
+      );
+      if (exactBfmidi) {
+        this.#emitLog({
+          type: "info",
+          message: "BFMIDI detectado por VID/PID exato (0x303a:0x80c2)",
+        });
+        return exactBfmidi;
+      }
+
+      // 2. Porta que corresponde ao ultimo VID/PID bem sucedido
+      if (savedInfo) {
+        const savedMatch = grantedPorts.find((port) =>
+          portMatchesSaved(port.getInfo?.() || {}, savedInfo)
+        );
+        if (savedMatch) {
+          this.#emitLog({
+            type: "info",
+            message: `Porta reconhecida do ultimo uso (VID=0x${savedInfo.vid.toString(16).padStart(4, "0")} PID=0x${savedInfo.pid.toString(16).padStart(4, "0")})`,
+          });
+          return savedMatch;
+        }
+      }
+
+      // 3. Porta com VID de ESP/USB-UART conhecida
+      const espPorts = grantedPorts.filter((port) =>
         looksLikeEspPort(port.getInfo?.() || {})
       );
 
-      if (preferredGranted) {
+      if (espPorts.length === 1) {
         this.#emitLog({
           type: "info",
           message: "Usando porta serial previamente autorizada (ESP detectado)",
         });
-        return preferredGranted;
+        return espPorts[0];
       }
 
+      if (espPorts.length > 1) {
+        // Mais de uma porta ESP; tenta Espressif nativo (0x303a) primeiro
+        const espressifNative = espPorts.find(
+          (port) => (port.getInfo?.() || {}).usbVendorId === 0x303a
+        );
+        if (espressifNative) {
+          this.#emitLog({
+            type: "info",
+            message:
+              "Varias portas ESP encontradas; priorizando Espressif nativo (0x303a)",
+          });
+          return espressifNative;
+        }
+      }
+
+      // 4. Unica porta autorizada (mesmo sem VID ESP)
       if (grantedPorts.length === 1) {
         this.#emitLog({
           type: "warn",
@@ -145,7 +244,7 @@ export class ConnectionManager extends EventTarget {
       this.#emitLog({
         type: "warn",
         message:
-          "Varias portas autorizadas sem assinatura ESP. Selecione manualmente no chooser.",
+          "Varias portas autorizadas sem match claro. Selecione manualmente no chooser.",
       });
     }
 
@@ -160,13 +259,25 @@ export class ConnectionManager extends EventTarget {
     }
   }
 
-  async conectarSerial() {
-    if (!navigator.serial) {
-      throw new Error("Web Serial nao suportado neste navegador");
-    }
+  async #requestSerialPortManual() {
+    this.#emitLog({
+      type: "warn",
+      message: "Abrindo seletor manual de porta serial...",
+    });
 
-    this.serialPort = await this.#requestSerialPortWithHeuristics();
-    this.lastSelectedPortInfo = this.serialPort?.getInfo?.() || null;
+    try {
+      return await navigator.serial.requestPort({ filters: SERIAL_PORT_FILTERS });
+    } catch (error) {
+      if (error && error.name === "TypeError") {
+        return navigator.serial.requestPort();
+      }
+      throw error;
+    }
+  }
+
+  async #openProtocol(port) {
+    this.serialPort = port;
+    this.lastSelectedPortInfo = port?.getInfo?.() || null;
 
     this.#emitLog({
       type: "info",
@@ -184,6 +295,42 @@ export class ConnectionManager extends EventTarget {
     });
 
     await this.protocol.open();
+
+    // Sinaliza DTR para evitar modo bootloader em alguns ESP32 boards
+    try {
+      if (typeof this.serialPort.setSignals === "function") {
+        await this.serialPort.setSignals({
+          dataTerminalReady: true,
+          requestToSend: false,
+        });
+      }
+    } catch {
+      // Nem todos os drivers suportam setSignals
+    }
+
+    // Drena qualquer lixo do buffer serial antes de comecar
+    await this.protocol.drainReadBuffer(300);
+  }
+
+  async #closeProtocol() {
+    if (this.protocol) {
+      try {
+        await this.protocol.close();
+      } catch {
+        // noop
+      }
+    }
+    this.protocol = null;
+    this.serialPort = null;
+  }
+
+  async conectarSerial() {
+    if (!navigator.serial) {
+      throw new Error("Web Serial nao suportado neste navegador");
+    }
+
+    const port = await this.#requestSerialPortWithHeuristics();
+    await this.#openProtocol(port);
     return this.protocol;
   }
 
@@ -240,12 +387,13 @@ export class ConnectionManager extends EventTarget {
 
   async #aguardarEditorAtivo() {
     let lastError = null;
+    const MAX_ROUNDS = 10;
 
-    for (let round = 0; round < 7; round += 1) {
+    for (let round = 0; round < MAX_ROUNDS; round += 1) {
       try {
         this.#emitLog({
           type: "info",
-          message: `Tentando ping serial (${round + 1}/7)...`,
+          message: `Tentando ping serial (${round + 1}/${MAX_ROUNDS})...`,
         });
 
         const ping = await this.testarConexao({
@@ -258,11 +406,13 @@ export class ConnectionManager extends EventTarget {
         lastError = error;
       }
 
-      if (round === 1 || round === 3 || round === 5) {
+      // Reenvia SysEx ENTER via MIDI em rounds estrategicos
+      if (round === 1 || round === 3 || round === 5 || round === 7) {
         await this.#tentarAtivarModoEditorViaMidi();
       }
 
-      await delay(420);
+      // Backoff progressivo: 300ms nos primeiros rounds, 500ms depois
+      await delay(round < 4 ? 300 : 500);
     }
 
     throw new Error(
@@ -300,7 +450,44 @@ export class ConnectionManager extends EventTarget {
       await this.#tentarAtivarModoEditorViaMidi();
     }
 
-    const ping = await this.#aguardarEditorAtivo();
+    // Tenta detectar o BFMIDI na porta auto-selecionada.
+    // Se falhar, fecha e pede selecao manual ao usuario.
+    let ping;
+    try {
+      ping = await this.#aguardarEditorAtivo();
+    } catch (firstError) {
+      this.#emitLog({
+        type: "warn",
+        message:
+          "Nao foi possivel conectar na porta auto-detectada. Tentando selecao manual...",
+      });
+
+      // Fecha a porta que nao respondeu
+      await this.#closeProtocol();
+
+      // Abre seletor manual do navegador
+      try {
+        const manualPort = await this.#requestSerialPortManual();
+        await this.#openProtocol(manualPort);
+
+        // Reenvia SysEx apos abrir nova porta
+        if (support.webMidi) {
+          await this.#tentarAtivarModoEditorViaMidi();
+        }
+
+        ping = await this.#aguardarEditorAtivo();
+      } catch (secondError) {
+        // Se a segunda tentativa tambem falhou, relata ambos erros
+        throw new Error(
+          `Falha na conexao. Auto: ${firstError.message} | Manual: ${secondError.message}`
+        );
+      }
+    }
+
+    // Conexao bem sucedida: salva VID/PID para proximo uso
+    if (this.lastSelectedPortInfo) {
+      saveLastPortInfo(this.lastSelectedPortInfo);
+    }
 
     return {
       protocol: this.protocol,

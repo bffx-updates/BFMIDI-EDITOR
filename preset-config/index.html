@@ -2484,7 +2484,6 @@
         <div class="action-buttons-grid" id="footer-main">
             <button class="btn btn-back" id="btnVoltar">Voltar</button>
             <button class="btn btn-options" id="btnOptions" onclick="toggleFooterOptions()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
-            <button class="btn btn-save" id="btnSalvar">Salvar</button>
         </div>
         <div class="action-buttons-grid hidden" id="footer-copy-paste">
             <button class="btn btn-copy" id="btnCopiar" onclick="handleCopy()">Copiar</button>
@@ -7683,6 +7682,14 @@ window.BFMIDI_ICONS_WEB = { fmt: "a4", icons: [{"id":1,"w":80,"h":69,"a4":"AAAAA
                 }, 500);
             }
 
+            // --- AUTO-SAVE debounced ---
+            let _autoSaveTimer = null;
+            function scheduleAutoSave() {
+                if (typeof suppressModelUpdate !== 'undefined' && suppressModelUpdate) return;
+                if (_autoSaveTimer) clearTimeout(_autoSaveTimer);
+                _autoSaveTimer = setTimeout(() => { _autoSaveTimer = null; saveCurrentPresetData(); }, 1000);
+            }
+
             async function saveCurrentPresetData() {
                 const col = currentPresetColumnIndex; const row = currentPresetRowIndex;
                 const globalIndex = col * NUM_PRESET_ROWS + row;
@@ -7834,9 +7841,24 @@ window.BFMIDI_ICONS_WEB = { fmt: "a4", icons: [{"id":1,"w":80,"h":69,"a4":"AAAAA
 
 
 function setupEventListeners() {
-                    // navigation / save
+                    // navigation
                     document.getElementById('btnVoltar')?.addEventListener('click', () => { window.location.href = '../'; });
-                    document.getElementById('btnSalvar')?.addEventListener('click', saveCurrentPresetData);
+
+                    // AUTO-SAVE: qualquer alteracao de input/select dispara save automatico
+                    const mainContent = document.querySelector('.content') || document.body;
+                    mainContent.addEventListener('change', (e) => {
+                        const tag = e.target.tagName;
+                        if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') scheduleAutoSave();
+                    });
+                    mainContent.addEventListener('input', (e) => {
+                        const tag = e.target.tagName;
+                        if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') scheduleAutoSave();
+                    });
+                    // Captura cliques em botoes/swatches que alteram estado (color pickers, toggles)
+                    mainContent.addEventListener('click', (e) => {
+                        const el = e.target.closest('.color-swatch, .toggle-button, .icon-option, .color-options-panel .swatch');
+                        if (el) scheduleAutoSave();
+                    });
 
                     // NEW GRID SELECTOR LOGIC
                     try {
