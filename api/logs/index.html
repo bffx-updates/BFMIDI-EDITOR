@@ -1,0 +1,63 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BFMIDI - Logs</title>
+  <style>
+    html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, Segoe UI, sans-serif; background: #080b11; color: #e6eef6; }
+    .wrap { display: grid; place-items: center; height: 100%; padding: 16px; text-align: center; }
+    .card { border: 1px solid rgba(57,160,255,0.45); border-radius: 12px; padding: 18px; background: rgba(10,15,24,0.95); max-width: 460px; width: 100%; }
+    h1 { margin: 0 0 8px; font-size: 1.05rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    p { margin: 0; color: #9aa5b3; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Gerando logs</h1>
+      <p id="status">Aguardando conexao USB...</p>
+    </div>
+  </div>
+
+  <script>
+    (async function () {
+      const statusEl = document.getElementById('status');
+      const bridge = window.parent && window.parent !== window ? window.parent.BFMIDIExternalBridge : null;
+
+      if (!bridge || typeof bridge.request !== 'function') {
+        statusEl.textContent = 'Bridge indisponivel. Voltando ao sistema.';
+        setTimeout(function () { window.location.replace('/system/'); }, 900);
+        return;
+      }
+
+      try {
+        const result = await bridge.request('/api/logs', { method: 'GET' });
+        const text = (result && typeof result.body === 'string') ? result.body : '';
+
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'bfmidi_logs.txt';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+
+        setTimeout(function () {
+          URL.revokeObjectURL(url);
+        }, 500);
+
+        statusEl.textContent = 'Download iniciado.';
+      } catch (error) {
+        statusEl.textContent = 'Erro: ' + (error && error.message ? error.message : String(error));
+      }
+
+      setTimeout(function () {
+        window.location.replace('/system/');
+      }, 900);
+    })();
+  </script>
+</body>
+</html>
